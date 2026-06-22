@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 400px; margin: 50px auto; }
+        input, button { display: block; width: 100%; padding: 10px; margin: 10px 0; }
+        .error { color: red; }
+        .success { color: green; }
+        .github-btn { background: #333; color: white; border: none; padding: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>登录</h2>
+    <form id="loginForm">
+        <input type="email" id="email" placeholder="邮箱" required>
+        <input type="password" id="password" placeholder="密码" required>
+        <button type="submit">登录</button>
+    </form>
+    <div id="message"></div>
+
+    <hr>
+    <h4>或者使用 GitHub 登录</h4>
+    <button id="githubLoginBtn" class="github-btn">使用 GitHub 账号登录</button>
+
+    <p>还没有账号？<a href="signup.html">去注册</a></p>
+
+    <script>
+        // 邮箱登录
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const msgDiv = document.getElementById('message');
+
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    msgDiv.innerHTML = `<span class="success">${data.message}</span>`;
+                    window.location.href = 'dashboard.html';
+                } else {
+                    msgDiv.innerHTML = `<span class="error">${data.message}</span>`;
+                }
+            } catch (error) {
+                msgDiv.innerHTML = `<span class="error">网络错误，请确保后端服务已启动</span>`;
+            }
+        });
+
+        // GitHub 登录
+        document.getElementById('githubLoginBtn').addEventListener('click', function() {
+            fetch('http://localhost:5000/api/auth/github')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.url) {
+                        window.location.href = data.url;
+                    } else {
+                        alert('获取 GitHub 登录地址失败');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('网络错误');
+                });
+        });
+    </script>
+</body>
+</html>
