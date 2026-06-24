@@ -1,11 +1,24 @@
 <script lang="ts" setup>
-  //
+  import { onMounted } from 'vue'
+  import AppHeader from '@/components/AppHeader.vue'
+  import { useAuth } from '@/composables/useAuth'
+
+  const { isAuthenticated, fetchUser } = useAuth()
+
+  onMounted(() => {
+    if (isAuthenticated.value) {
+      fetchUser()
+    }
+  })
 </script>
 
 <template>
   <div aria-hidden="true" class="mesh-bg" />
-  <main class="main-bg min-h-screen p-4 flex items-center">
-    <router-view />
+  <main class="main-bg min-h-screen p-4">
+    <AppHeader />
+    <div class="flex items-center justify-center">
+      <router-view />
+    </div>
   </main>
 </template>
 
