@@ -308,8 +308,8 @@ products.filter(p => p.tags?.includes('under-5'))
 | `HeroBanner` | Carousel 轮播，自动播放，左右箭头，底部圆点指示器 | Embla Autoplay 5s；slide 切换；active 圆点宽度动画 |
 | `CategoryGrid` | 8~12 个圆形/方形分类图标 + 文字，横向滚动或网格 | 项 hover 背景变橙；mobile scroll-snap |
 
-- [ ] 安装并接入 `embla-carousel-autoplay`
-- [ ] `useReducedMotion` 为 true 时禁用 autoplay
+- [x] 安装并接入 `embla-carousel-autoplay`
+- [x] `useReducedMotion` 为 true 时禁用 autoplay
 
 **验收**：轮播可切换且**自动播放**；**圆点与箭头状态有过渡**；分类 hover 有反馈。
 
@@ -445,4 +445,5 @@ Budget Deals:  Under $5  |  Under $10
 | 日期 | 说明 |
 |---|---|
 | 2026-07-01 | 初版工作计划落盘 |
+| 2026-07-01 | 阶段 2 完成：HeroBanner 轮播 + CategoryGrid 分类入口 |
 | 2026-07-01 | 阶段 1 完成：Layout 组件（TopBar / Header / MegaMenu / SearchBar / Footer） |

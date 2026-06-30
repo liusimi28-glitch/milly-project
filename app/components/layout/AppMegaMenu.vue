@@ -1,26 +1,6 @@
 <script setup lang="ts">
 import type { Category } from '~/types'
-import {
-  BitcoinIcon,
-  CoinsIcon,
-  Dice5Icon,
-  FileTextIcon,
-  Gamepad2Icon,
-  GiftIcon,
-  GraduationCapIcon,
-  GhostIcon,
-  LayoutGridIcon,
-  MonitorIcon,
-  PackageIcon,
-  RepeatIcon,
-  ShieldCheckIcon,
-  ShieldIcon,
-  SmartphoneIcon,
-  SparklesIcon,
-  SwordsIcon,
-  TrophyIcon,
-} from '@lucide/vue'
-import type { Component } from 'vue'
+import { getCategoryIcon } from '@/lib/category-icons'
 
 defineEmits<{
   keepOpen: []
@@ -32,34 +12,6 @@ defineProps<{
 }>()
 
 const { categories } = useMockProducts()
-
-const iconMap: Record<string, Component> = {
-  'gamepad-2': Gamepad2Icon,
-  'monitor': MonitorIcon,
-  'gift': GiftIcon,
-  'package': PackageIcon,
-  'repeat': RepeatIcon,
-  'dice-5': Dice5Icon,
-  'coins': CoinsIcon,
-  'smartphone': SmartphoneIcon,
-  'graduation-cap': GraduationCapIcon,
-  'bitcoin': BitcoinIcon,
-  'swords': SwordsIcon,
-  'shield': ShieldIcon,
-  'ghost': GhostIcon,
-  'sparkles': SparklesIcon,
-  'trophy': TrophyIcon,
-  'file-text': FileTextIcon,
-  'shield-check': ShieldCheckIcon,
-  'layout-grid': LayoutGridIcon,
-  'steam': Gamepad2Icon,
-  'xbox': Gamepad2Icon,
-  'playstation': Gamepad2Icon,
-}
-
-function getIcon(name: string) {
-  return iconMap[name] ?? PackageIcon
-}
 
 function categoryHref(category: Category) {
   return `/category/${category.slug}`
@@ -91,7 +43,7 @@ function categoryHref(category: Category) {
             class="group flex items-center gap-2 font-semibold text-g2a-text transition-colors duration-[var(--motion-fast)] hover:text-g2a-orange"
           >
             <component
-              :is="getIcon(category.icon)"
+              :is="getCategoryIcon(category.icon)"
               class="size-4 text-g2a-orange"
               aria-hidden="true"
             />
