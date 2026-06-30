@@ -1,7 +1,7 @@
 import { banners } from '~/data/mock/banners'
 import { categories, categoryQuickLinks } from '~/data/mock/categories'
 import { footerColumns, paymentMethods } from '~/data/mock/footer'
-import { headerNavLinks, topBarLinks } from '~/data/mock/navigation'
+import { searchSuggestions, headerNavLinks, topBarLinks } from '~/data/mock/navigation'
 import { products } from '~/data/mock/products'
 import type { Product } from '~/types'
 
@@ -18,6 +18,7 @@ export function useMockProducts() {
     categoryQuickLinks,
     topBarLinks,
     headerNavLinks,
+    searchSuggestions,
     footerColumns,
     paymentMethods,
     weeklyTrends: getByTag('weekly-trend', 12),

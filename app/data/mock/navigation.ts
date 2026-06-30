@@ -16,3 +16,14 @@ export const headerNavLinks: NavLink[] = [
   { label: 'Software', href: '/software-deals' },
   { label: 'G2A Plus', href: '/plus', highlight: true },
 ]
+
+export const searchSuggestions = [
+  'Cyberpunk 2077',
+  'Elden Ring',
+  'Steam Gift Card',
+  'Xbox Game Pass',
+  'Random Keys',
+  'Windows 11 Pro',
+  'Baldur\'s Gate 3',
+  'PlayStation Store',
+]
