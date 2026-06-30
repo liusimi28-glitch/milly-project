@@ -324,7 +324,7 @@ products.filter(p => p.tags?.includes('under-5'))
 | `ProductGrid` | Bestsellers 4 列网格，响应式 2→4 列 | 复用 ProductCard 动效 |
 | `DiscountBadge` | 红色/橙色 `-XX%` 标签 | 可选：进入视口 fade-in |
 
-- [ ] 商品图 lazy load + 加载完成后 opacity 过渡
+- [x] 商品图 lazy load + 加载完成后 opacity 过渡
 
 **验收**：商品区块数据来自 mock；**卡片 hover 有阴影/上浮/封面 zoom**；横滑箭头状态正确。
 
@@ -445,5 +445,6 @@ Budget Deals:  Under $5  |  Under $10
 | 日期 | 说明 |
 |---|---|
 | 2026-07-01 | 初版工作计划落盘 |
+| 2026-07-01 | 阶段 3 完成：ProductCard / ProductCarousel / ProductGrid / DiscountBadge |
 | 2026-07-01 | 阶段 2 完成：HeroBanner 轮播 + CategoryGrid 分类入口 |
 | 2026-07-01 | 阶段 1 完成：Layout 组件（TopBar / Header / MegaMenu / SearchBar / Footer） |

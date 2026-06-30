@@ -1,13 +1,7 @@
 <script setup lang="ts">
-const {
-  weeklyTrends,
-  bestsellers,
-  products,
-} = useMockProducts()
+const { weeklyTrends, bestsellers } = useMockProducts()
 
 const pendingSections = [
-  { id: 'weekly-trends', label: 'Weekly Trends', count: weeklyTrends.length },
-  { id: 'bestsellers', label: 'Bestsellers', count: bestsellers.length },
   { id: 'genres', label: 'Genre Tabs', count: 5 },
   { id: 'budget', label: 'Budget Deals', count: 2 },
   { id: 'plus', label: 'G2A Plus Promo', count: 1 },
@@ -21,6 +15,18 @@ const pendingSections = [
   <div>
     <HomeHeroBanner />
     <HomeCategoryGrid />
+
+    <HomeProductCarousel
+      title="Weekly Trends"
+      :products="weeklyTrends"
+      view-all-href="/best-deals/weekly-trends"
+    />
+
+    <HomeProductGrid
+      title="Bestsellers"
+      :products="bestsellers"
+      view-all-href="/best-deals/best-gamers-choice"
+    />
 
     <section
       v-for="section in pendingSections"
