@@ -445,6 +445,7 @@ Budget Deals:  Under $5  |  Under $10
 | 日期 | 说明 |
 |---|---|
 | 2026-07-01 | 初版工作计划落盘 |
+| 2026-07-01 | 阶段 5 完成：TrustBadges / AppDownload / reduced-motion 降级 |
 | 2026-07-01 | 阶段 4 完成：GenreTabs / BudgetDeals / PlusPromo / RandomKeysPromo |
 | 2026-07-01 | 阶段 3 完成：ProductCard / ProductCarousel / ProductGrid / DiscountBadge |
 | 2026-07-01 | 阶段 2 完成：HeroBanner 轮播 + CategoryGrid 分类入口 |

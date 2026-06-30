@@ -6,6 +6,8 @@ const props = defineProps<{
   product: Product
 }>()
 
+const { prefersReducedMotion } = useReducedMotion()
+
 const imageLoaded = ref(false)
 
 const badgeLabel: Record<string, string> = {
@@ -19,12 +21,23 @@ function formatPrice(value: number) {
 }
 
 const productHref = computed(() => `/product/${props.product.id}`)
+
+const cardClass = computed(() => [
+  'group flex h-full flex-col overflow-hidden rounded-lg border border-g2a-border bg-white transition-all duration-[var(--motion-base)] ease-[var(--ease-out)] focus-visible:ring-2 focus-visible:ring-g2a-orange focus-visible:ring-offset-2 focus-visible:outline-none',
+  prefersReducedMotion.value ? 'hover:shadow-md' : 'hover:-translate-y-0.5 hover:shadow-lg',
+])
+
+const imageClass = computed(() => [
+  'size-full object-cover transition-all duration-[var(--motion-base)] ease-[var(--ease-out)]',
+  !prefersReducedMotion.value && 'group-hover:scale-[1.03]',
+  imageLoaded.value ? 'opacity-100' : 'opacity-0',
+])
 </script>
 
 <template>
   <NuxtLink
     :to="productHref"
-    class="group flex h-full flex-col overflow-hidden rounded-lg border border-g2a-border bg-white transition-all duration-[var(--motion-base)] ease-[var(--ease-out)] hover:-translate-y-0.5 hover:shadow-lg"
+    :class="cardClass"
   >
     <div class="relative aspect-[3/4] overflow-hidden bg-g2a-gray">
       <div
@@ -36,8 +49,7 @@ const productHref = computed(() => `/product/${props.product.id}`)
         :src="product.image"
         :alt="product.title"
         loading="lazy"
-        class="size-full object-cover transition-all duration-[var(--motion-base)] ease-[var(--ease-out)] group-hover:scale-[1.03]"
-        :class="imageLoaded ? 'opacity-100' : 'opacity-0'"
+        :class="imageClass"
         @load="imageLoaded = true"
       >
 
