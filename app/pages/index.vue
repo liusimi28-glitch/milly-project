@@ -2,10 +2,6 @@
 const { weeklyTrends, bestsellers } = useMockProducts()
 
 const pendingSections = [
-  { id: 'genres', label: 'Genre Tabs', count: 5 },
-  { id: 'budget', label: 'Budget Deals', count: 2 },
-  { id: 'plus', label: 'G2A Plus Promo', count: 1 },
-  { id: 'random-keys', label: 'Random Keys', count: 1 },
   { id: 'trust', label: 'Trust Badges', count: 4 },
   { id: 'app', label: 'App Download', count: 1 },
 ] as const
@@ -27,6 +23,11 @@ const pendingSections = [
       :products="bestsellers"
       view-all-href="/best-deals/best-gamers-choice"
     />
+
+    <HomeGenreTabs />
+    <HomeBudgetDeals />
+    <HomePlusPromo />
+    <HomeRandomKeysPromo />
 
     <section
       v-for="section in pendingSections"

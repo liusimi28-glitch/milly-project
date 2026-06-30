@@ -445,6 +445,7 @@ Budget Deals:  Under $5  |  Under $10
 | 日期 | 说明 |
 |---|---|
 | 2026-07-01 | 初版工作计划落盘 |
+| 2026-07-01 | 阶段 4 完成：GenreTabs / BudgetDeals / PlusPromo / RandomKeysPromo |
 | 2026-07-01 | 阶段 3 完成：ProductCard / ProductCarousel / ProductGrid / DiscountBadge |
 | 2026-07-01 | 阶段 2 完成：HeroBanner 轮播 + CategoryGrid 分类入口 |
 | 2026-07-01 | 阶段 1 完成：Layout 组件（TopBar / Header / MegaMenu / SearchBar / Footer） |
