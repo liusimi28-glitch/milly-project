@@ -6,11 +6,11 @@ const { weeklyTrends, bestsellers } = useMockProducts()
   <div>
     <HomeHeroBanner />
 
-    <HomeScrollReveal>
+    <HomeScrollReveal immediate>
       <HomeCategoryGrid />
     </HomeScrollReveal>
 
-    <HomeScrollReveal :delay="50">
+    <HomeScrollReveal immediate :delay="50">
       <HomeProductCarousel
         title="Weekly Trends"
         :products="weeklyTrends"

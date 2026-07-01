@@ -3,14 +3,24 @@ import { useIntersectionObserver } from '@vueuse/core'
 
 const props = withDefaults(defineProps<{
   delay?: number
+  /** Skip animation when already in viewport on mount (above-the-fold sections) */
+  immediate?: boolean
 }>(), {
   delay: 0,
+  immediate: false,
 })
 
 const { prefersReducedMotion } = useReducedMotion()
 
 const root = ref<HTMLElement | null>(null)
 const isVisible = ref(false)
+
+function checkInViewport() {
+  const el = root.value
+  if (!el) return false
+  const rect = el.getBoundingClientRect()
+  return rect.top < window.innerHeight && rect.bottom > 0
+}
 
 useIntersectionObserver(
   root,
@@ -19,8 +29,18 @@ useIntersectionObserver(
       isVisible.value = true
     }
   },
-  { threshold: 0.08, rootMargin: '0px 0px -40px 0px' },
+  { threshold: 0.01, rootMargin: '0px 0px 50px 0px' },
 )
+
+onMounted(() => {
+  if (prefersReducedMotion.value || props.immediate) {
+    isVisible.value = true
+    return
+  }
+  if (checkInViewport()) {
+    isVisible.value = true
+  }
+})
 
 const revealClass = computed(() => {
   if (prefersReducedMotion.value) return ''
@@ -31,7 +51,7 @@ const revealClass = computed(() => {
 })
 
 const revealStyle = computed(() =>
-  props.delay && !prefersReducedMotion.value
+  props.delay && !prefersReducedMotion.value && isVisible.value
     ? { transitionDelay: `${props.delay}ms` }
     : undefined,
 )

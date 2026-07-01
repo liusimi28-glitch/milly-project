@@ -8,7 +8,30 @@ const props = defineProps<{
 
 const { prefersReducedMotion } = useReducedMotion()
 
+const imageRef = ref<HTMLImageElement | null>(null)
 const imageLoaded = ref(false)
+
+function markImageLoaded() {
+  imageLoaded.value = true
+}
+
+function syncImageLoadedState() {
+  const img = imageRef.value
+  if (img?.complete && img.naturalWidth > 0) {
+    markImageLoaded()
+  }
+}
+
+function onImageError() {
+  markImageLoaded()
+}
+
+watch(() => props.product.image, () => {
+  imageLoaded.value = false
+  nextTick(syncImageLoadedState)
+})
+
+onMounted(syncImageLoadedState)
 
 const badgeLabel: Record<string, string> = {
   bestseller: 'Bestseller',
@@ -46,11 +69,14 @@ const imageClass = computed(() => [
         aria-hidden="true"
       />
       <img
+        ref="imageRef"
         :src="product.image"
         :alt="product.title"
         loading="lazy"
+        decoding="async"
         :class="imageClass"
-        @load="imageLoaded = true"
+        @load="markImageLoaded"
+        @error="onImageError"
       >
 
       <div class="absolute top-2 left-2 flex flex-col gap-1">

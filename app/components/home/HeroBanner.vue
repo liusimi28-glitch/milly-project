@@ -71,7 +71,8 @@ function scrollNext() {
               :src="banner.image"
               :alt="banner.title"
               class="absolute inset-0 size-full object-cover opacity-40"
-              loading="lazy"
+              :loading="index === 0 ? 'eager' : 'lazy'"
+              :fetchpriority="index === 0 ? 'high' : 'auto'"
             >
             <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
 
