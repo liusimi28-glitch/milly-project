@@ -354,6 +354,12 @@ products.filter(p => p.tags?.includes('under-5'))
 
 **验收**：整页结构完整；移动端可完整浏览；**系统开启「减少动态效果」时 autoplay 与 hover transform 已降级**。
 
+- [x] 实现 `TrustBadges`（4 项信任背书 + 图标 hover）
+- [x] 实现 `AppDownload`（App Store / Google Play 占位按钮）
+- [x] `ProductCard` / HeroBanner / AppDownload / Header 购物车联动 `useReducedMotion`
+- [x] 首页 13 模块全部接入，无占位区块
+- [x] `prefers-reduced-motion` CSS 规则与 focus-visible 支持
+
 ---
 
 ### 阶段 6：动效打磨与对照验收（约 0.5 天）

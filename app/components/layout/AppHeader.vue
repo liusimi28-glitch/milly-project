@@ -11,6 +11,12 @@ import type { Category } from '~/types'
 
 const { categories } = useMockProducts()
 const { isScrolled } = useScrollHeader(80)
+const { prefersReducedMotion } = useReducedMotion()
+
+const cartLinkClass = computed(() => [
+  'relative inline-flex size-10 items-center justify-center rounded-md text-g2a-text transition-all duration-[var(--motion-fast)] hover:bg-g2a-gray hover:text-g2a-orange focus-visible:ring-2 focus-visible:ring-g2a-orange focus-visible:ring-offset-2 focus-visible:outline-none',
+  !prefersReducedMotion.value && 'hover:scale-105',
+])
 
 const megaMenuOpen = ref(false)
 const mobileMenuOpen = ref(false)
@@ -133,7 +139,7 @@ onUnmounted(() => {
 
           <NuxtLink
             to="/cart"
-            class="relative inline-flex size-10 items-center justify-center rounded-md text-g2a-text transition-all duration-[var(--motion-fast)] hover:scale-105 hover:bg-g2a-gray hover:text-g2a-orange"
+            :class="cartLinkClass"
             aria-label="Cart, 3 items"
           >
             <ShoppingCartIcon class="size-5" />
