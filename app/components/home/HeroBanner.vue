@@ -15,11 +15,16 @@ const { prefersReducedMotion } = useReducedMotion()
 const selectedIndex = ref(0)
 const carouselApi = ref<UnwrapRefCarouselApi | null>(null)
 
-const autoplay = Autoplay({ delay: 5000, stopOnMouseEnter: true })
+const autoplay = Autoplay({ delay: 5000, stopOnMouseEnter: true, stopOnInteraction: true })
 
 const plugins = computed(() =>
   prefersReducedMotion.value ? undefined : [autoplay],
 )
+
+const carouselOpts = computed(() => ({
+  loop: true,
+  duration: prefersReducedMotion.value ? 0 : 25,
+}))
 
 function syncNavState(api: UnwrapRefCarouselApi) {
   selectedIndex.value = api.selectedScrollSnap()
@@ -48,7 +53,7 @@ function scrollNext() {
   <section class="relative bg-g2a-gray" aria-label="Promotional banners">
     <Carousel
       class="w-full"
-      :opts="{ loop: true }"
+      :opts="carouselOpts"
       :plugins="plugins"
       @init-api="onInitApi"
     >
@@ -82,7 +87,8 @@ function scrollNext() {
               </p>
               <NuxtLink
                 :to="banner.href"
-                class="mt-5 inline-flex h-10 items-center rounded-md bg-g2a-orange px-5 text-sm font-semibold text-white transition-all duration-[var(--motion-fast)] hover:brightness-110"
+                class="mt-5 inline-flex h-10 items-center rounded-md bg-g2a-orange px-5 text-sm font-semibold text-white transition-all duration-[var(--motion-fast)] focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent focus-visible:outline-none"
+                :class="!prefersReducedMotion && 'hover:brightness-110'"
               >
                 {{ banner.cta }}
               </NuxtLink>

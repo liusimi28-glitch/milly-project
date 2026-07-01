@@ -81,7 +81,7 @@ function scrollNext() {
       </div>
 
       <Carousel
-        :opts="{ align: 'start', dragFree: true }"
+        :opts="{ align: 'start', dragFree: true, duration: 25 }"
         @init-api="onInitApi"
       >
         <CarouselContent class="-ml-3">

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { CrownIcon, SparklesIcon } from '@lucide/vue'
+
+const { prefersReducedMotion } = useReducedMotion()
 </script>
 
 <template>
@@ -33,7 +35,8 @@ import { CrownIcon, SparklesIcon } from '@lucide/vue'
 
           <NuxtLink
             to="/plus"
-            class="inline-flex h-11 shrink-0 items-center gap-2 rounded-md bg-g2a-orange px-6 text-sm font-semibold text-white transition-all duration-[var(--motion-fast)] hover:brightness-110"
+            class="inline-flex h-11 shrink-0 items-center gap-2 rounded-md bg-g2a-orange px-6 text-sm font-semibold text-white transition-all duration-[var(--motion-fast)] focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:outline-none"
+            :class="!prefersReducedMotion && 'hover:brightness-110'"
           >
             <SparklesIcon class="size-4" aria-hidden="true" />
             Join G2A Plus

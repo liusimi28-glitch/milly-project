@@ -366,11 +366,11 @@ products.filter(p => p.tags?.includes('under-5'))
 
 > 在各阶段组件就绪后，对照 Simple Browser 中的 g2a.com 首页做动效逐项核对。
 
-- [ ] 在 `motion.css` 或 `tailwind.css` 中集中定义动效 token 与 `@media (prefers-reduced-motion: reduce)` 规则
-- [ ] 实现 `useReducedMotion` composable，Hero autoplay 与卡片 transform 联动降级
-- [ ] 对照 g2a.com 录屏/逐块检查：Header sticky、Banner 轮播、商品 hover、Tab 切换 timing
-- [ ] 修复 timing 偏差（过快/过慢）与缺失过渡
-- [ ] （可选）主内容区 scroll-reveal：区块进入视口 fade-up，stagger 50ms
+- [x] 在 `motion.css` 或 `tailwind.css` 中集中定义动效 token 与 `@media (prefers-reduced-motion: reduce)` 规则
+- [x] 实现 `useReducedMotion` composable，Hero autoplay 与卡片 transform 联动降级
+- [x] 对照 g2a.com 录屏/逐块检查：Header sticky、Banner 轮播、商品 hover、Tab 切换 timing
+- [x] 修复 timing 偏差（过快/过慢）与缺失过渡（Embla duration、Carousel/Tab 过渡）
+- [x] （可选）主内容区 scroll-reveal：区块进入视口 fade-up，stagger 50ms
 
 **验收**：与 g2a.com 并排对比，**核心动效（轮播、hover、Tab、Header scroll）无明显缺失**；无 layout shift 导致的动效抖动。
 
@@ -451,6 +451,7 @@ Budget Deals:  Under $5  |  Under $10
 | 日期 | 说明 |
 |---|---|
 | 2026-07-01 | 初版工作计划落盘 |
+| 2026-07-01 | 阶段 6 完成：motion.css、ScrollReveal、Embla duration、动效降级补全 |
 | 2026-07-01 | 阶段 5 完成：TrustBadges / AppDownload / reduced-motion 降级 |
 | 2026-07-01 | 阶段 4 完成：GenreTabs / BudgetDeals / PlusPromo / RandomKeysPromo |
 | 2026-07-01 | 阶段 3 完成：ProductCard / ProductCarousel / ProductGrid / DiscountBadge |

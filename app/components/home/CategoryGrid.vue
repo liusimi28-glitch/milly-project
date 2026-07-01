@@ -3,10 +3,16 @@ import type { Category } from '~/types'
 import { getCategoryIcon } from '@/lib/category-icons'
 
 const { categoryQuickLinks } = useMockProducts()
+const { prefersReducedMotion } = useReducedMotion()
 
 function categoryHref(category: Category) {
   return `/category/${category.slug}`
 }
+
+const iconClass = computed(() => [
+  'size-6 text-g2a-orange transition-transform duration-[var(--motion-fast)] sm:size-7',
+  !prefersReducedMotion.value && 'group-hover:scale-110',
+])
 </script>
 
 <template>
@@ -27,7 +33,7 @@ function categoryHref(category: Category) {
           >
             <component
               :is="getCategoryIcon(category.icon)"
-              class="size-6 text-g2a-orange transition-transform duration-[var(--motion-fast)] group-hover:scale-110 sm:size-7"
+              :class="iconClass"
               aria-hidden="true"
             />
           </span>
