@@ -8,6 +8,17 @@ export function useSupabaseAuth() {
   const authLoading = useState('auth-loading', () => true)
   const authError = ref<string | null>(null)
   const authPending = ref(false)
+  const isConfigured = computed(() => !!$supabase)
+
+  const configError = 'Supabase is not configured. Check .env.local and restart the dev server.'
+
+  function requireSupabase() {
+    if (!$supabase) {
+      authError.value = configError
+      return null
+    }
+    return $supabase
+  }
 
   const isLoggedIn = computed(() => !!user.value)
   const isAnonymous = computed(() => user.value?.is_anonymous ?? false)
@@ -39,9 +50,11 @@ export function useSupabaseAuth() {
   }
 
   async function signUp(email: string, password: string) {
+    const client = requireSupabase()
+    if (!client) return { ok: false as const }
     authPending.value = true
     clearError()
-    const { data, error } = await $supabase.auth.signUp({ email, password })
+    const { data, error } = await client.auth.signUp({ email, password })
     authPending.value = false
     if (error) {
       setError(error)
@@ -54,9 +67,11 @@ export function useSupabaseAuth() {
   }
 
   async function signIn(email: string, password: string) {
+    const client = requireSupabase()
+    if (!client) return { ok: false as const }
     authPending.value = true
     clearError()
-    const { error } = await $supabase.auth.signInWithPassword({ email, password })
+    const { error } = await client.auth.signInWithPassword({ email, password })
     authPending.value = false
     if (error) {
       setError(error)
@@ -66,12 +81,14 @@ export function useSupabaseAuth() {
   }
 
   async function signInWithGoogle() {
+    const client = requireSupabase()
+    if (!client) return { ok: false as const }
     authPending.value = true
     clearError()
     const redirectTo = import.meta.client
       ? `${window.location.origin}/auth/callback`
       : undefined
-    const { error } = await $supabase.auth.signInWithOAuth({
+    const { error } = await client.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo },
     })
@@ -84,9 +101,11 @@ export function useSupabaseAuth() {
   }
 
   async function signInAnonymously() {
+    const client = requireSupabase()
+    if (!client) return { ok: false as const }
     authPending.value = true
     clearError()
-    const { error } = await $supabase.auth.signInAnonymously()
+    const { error } = await client.auth.signInAnonymously()
     authPending.value = false
     if (error) {
       setError(error)
@@ -96,9 +115,11 @@ export function useSupabaseAuth() {
   }
 
   async function signOut() {
+    const client = requireSupabase()
+    if (!client) return { ok: false as const }
     authPending.value = true
     clearError()
-    const { error } = await $supabase.auth.signOut()
+    const { error } = await client.auth.signOut()
     authPending.value = false
     if (error) {
       setError(error)
@@ -113,6 +134,7 @@ export function useSupabaseAuth() {
     authLoading,
     authError,
     authPending,
+    isConfigured,
     isLoggedIn,
     isAnonymous,
     displayName,

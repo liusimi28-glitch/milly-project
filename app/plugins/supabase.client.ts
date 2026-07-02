@@ -5,9 +5,25 @@ let authListenerRegistered = false
 export default defineNuxtPlugin(async () => {
   const config = useRuntimeConfig()
 
+  const supabaseUrl = config.public.supabaseUrl
+  const supabaseAnonKey = config.public.supabaseAnonKey
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn(
+      '[supabase] Missing NUXT_PUBLIC_SUPABASE_URL or NUXT_PUBLIC_SUPABASE_ANON_KEY. '
+      + 'Add them to .env.local and restart the dev server.',
+    )
+    useState('auth-loading', () => true).value = false
+    return {
+      provide: {
+        supabase: null,
+      },
+    }
+  }
+
   const supabase = createClient(
-    config.public.supabaseUrl,
-    config.public.supabaseAnonKey,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       auth: {
         persistSession: true,
