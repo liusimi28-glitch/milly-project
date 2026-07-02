@@ -4,7 +4,6 @@ import {
   GlobeIcon,
   MenuIcon,
   ShoppingCartIcon,
-  UserIcon,
   XIcon,
 } from '@lucide/vue'
 import type { Category } from '~/types'
@@ -20,6 +19,7 @@ const cartLinkClass = computed(() => [
 
 const megaMenuOpen = ref(false)
 const mobileMenuOpen = ref(false)
+const authDropdownOpen = ref(false)
 let closeTimer: ReturnType<typeof setTimeout> | null = null
 
 function openMegaMenu() {
@@ -27,6 +27,7 @@ function openMegaMenu() {
     clearTimeout(closeTimer)
     closeTimer = null
   }
+  authDropdownOpen.value = false
   megaMenuOpen.value = true
 }
 
@@ -50,6 +51,14 @@ function toggleMobileMenu() {
 
 function closeMobileMenu() {
   mobileMenuOpen.value = false
+}
+
+function closeMegaMenuForAuth() {
+  megaMenuOpen.value = false
+  if (closeTimer) {
+    clearTimeout(closeTimer)
+    closeTimer = null
+  }
 }
 
 function categoryHref(category: Category) {
@@ -129,13 +138,10 @@ onUnmounted(() => {
 
         <!-- Actions -->
         <div class="flex shrink-0 items-center gap-1 sm:gap-2">
-          <NuxtLink
-            to="/account"
-            class="inline-flex size-10 items-center justify-center rounded-md text-g2a-text transition-all duration-[var(--motion-fast)] hover:bg-g2a-gray hover:text-g2a-orange"
-            aria-label="Account"
-          >
-            <UserIcon class="size-5" />
-          </NuxtLink>
+          <LayoutAuthDropdown
+            v-model:open="authDropdownOpen"
+            :close-mega-menu="closeMegaMenuForAuth"
+          />
 
           <NuxtLink
             to="/cart"
