@@ -1,5 +1,8 @@
 .DEFAULT_GOAL := help
 
+IMAGE_NAME ?= mall
+IMAGE_TAG ?= latest
+
 # 定义一个井号变量，避免被 make 解析为注释
 HASH := \#
 
@@ -34,3 +37,7 @@ build: ## 构建生产环境产物 (Build for production)
 .PHONY: clean
 clean: ## 清除构建产物和依赖 (Clean build outputs and modules)
 	rm -rf node_modules .nuxt .output
+
+.PHONY: docker-build
+docker-build: ## 构建 Docker 镜像 (Build Docker image)
+	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
