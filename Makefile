@@ -1,7 +1,10 @@
 .DEFAULT_GOAL := help
 
 IMAGE_NAME ?= mall
-IMAGE_TAG ?= latest
+
+GIT_NEAREST_TAG := $(shell git describe --tags --abbrev=0 2>/dev/null)
+GIT_SHORT_HASH := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
+IMAGE_TAG ?= $(if $(GIT_NEAREST_TAG),$(GIT_NEAREST_TAG)-$(GIT_SHORT_HASH),$(GIT_SHORT_HASH))
 
 # 定义一个井号变量，避免被 make 解析为注释
 HASH := \#
@@ -37,6 +40,10 @@ build: ## 构建生产环境产物 (Build for production)
 .PHONY: clean
 clean: ## 清除构建产物和依赖 (Clean build outputs and modules)
 	rm -rf node_modules .nuxt .output
+
+.PHONY: print-image-tag
+print-image-tag: ## 输出默认镜像标签 (Print default image tag)
+	@echo $(IMAGE_TAG)
 
 .PHONY: docker-build
 docker-build: ## 构建 Docker 镜像 (Build Docker image)
