@@ -45,6 +45,14 @@ clean: ## 清除构建产物和依赖 (Clean build outputs and modules)
 print-image-tag: ## 输出默认镜像标签 (Print default image tag)
 	@echo $(IMAGE_TAG)
 
+.PHONY: audit
+audit: ## 检查依赖漏洞 (Audit dependencies)
+	pnpm audit
+
 .PHONY: docker-build
 docker-build: ## 构建 Docker 镜像 (Build Docker image)
 	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
+
+.PHONY: docker-scan
+docker-scan: docker-build ## 扫描镜像漏洞 (Scan Docker image; requires trivy)
+	trivy image $(IMAGE_NAME):$(IMAGE_TAG)
