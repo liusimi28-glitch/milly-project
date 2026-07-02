@@ -1,0 +1,40 @@
+/**
+ * G2A homepage motion system
+ * @see docs/plans/g2a-homepage-plan.md §4.1
+ */
+
+@layer utilities {
+  .motion-ease-out {
+    transition-timing-function: var(--ease-out);
+  }
+
+  .motion-ease-in-out {
+    transition-timing-function: var(--ease-in-out);
+  }
+
+  .motion-fast {
+    transition-duration: var(--motion-fast);
+  }
+
+  .motion-base {
+    transition-duration: var(--motion-base);
+  }
+
+  .motion-slow {
+    transition-duration: var(--motion-slow);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .scroll-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
