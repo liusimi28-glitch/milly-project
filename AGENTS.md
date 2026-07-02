@@ -63,3 +63,11 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+
+## 5. Workspace Term Mapping
+
+In this workspace, interpret these terms as fixed paths:
+- "后端" means `/home/ubuntu/workshop/sitea/mall-back`.
+- "dash" means `/home/ubuntu/workshop/sitea/mall-dashboard`.
+- "客户端" means `/home/ubuntu/workshop/sitea/mall`.
+
