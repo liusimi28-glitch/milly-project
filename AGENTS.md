@@ -71,3 +71,47 @@ In this workspace, interpret these terms as fixed paths:
 - "dash" means `/home/ubuntu/workshop/sitea/mall-dashboard`.
 - "客户端" means `/home/ubuntu/workshop/sitea/mall`.
 
+## Stack
+- Framework: Vue 3 + Vite
+- UI Library: Vuetify0
+- Enabled Features: ESLint, Vue Router, UnoCSS
+
+## Branch
+- Active development branch: `develop`
+- Production branch: `master`
+
+## Design System (must follow for all new pages)
+
+Reference implementation: `src/components/HelloWorld.vue`, `src/App.vue`, theme in `src/plugins/vuetify.ts`.
+
+### Colors (dark theme default)
+- Primary: `#c4b5fd` — use `text-primary` / `bg-primary`
+- Secondary: `#94a3b8`
+- Background: `#121212` with `text-on-background` (`#e0e0e0`)
+- Surface (cards): `#1a1a1a` — `bg-surface`, `text-on-surface`
+- Borders: `border-subtle` (never invent new border colors)
+- Do not introduce new primary colors; use theme tokens only
+
+### Typography
+- Font: Roboto
+- Hero: `text-4xl font-bold text-on-background`
+- Section title: `text-2xl font-bold text-on-surface`
+- Body: `text-sm` + `opacity-60`
+- Labels: `text-xs font-medium uppercase tracking-wide opacity-50`
+
+### Components
+- Card: `rounded-xl border border-subtle bg-surface p-6`
+- Button: `rounded-lg px-4 py-3 font-medium transition-colors`
+- Links: `text-sm text-primary hover:underline`
+- No heavy box-shadow; use border + surface layering
+
+### Layout
+- Max width: `max-w-2xl` (default), `max-w-md` (forms), `max-w-lg` (panels)
+- Spacing: `mb-8`/`mb-12` between sections, `gap-3` in button groups
+- Page shell padding comes from `App.vue` (`p-4`)
+
+### Mock data
+- Use mock data with proper TypeScript interfaces until real APIs are wired
+- Keep mock data structured for easy API replacement
+
+Full rules: `.cursor/rules/design-system.mdc`

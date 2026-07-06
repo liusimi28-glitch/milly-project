@@ -1,0 +1,105 @@
+---
+description: 页面 UI 设计规范，与首页保持一致的配色、排版、组件与布局
+globs: src/pages/**/*.vue, src/components/**/*.vue
+alwaysApply: true
+---
+
+# milly-project 页面设计规范
+
+生成或修改页面/组件时，严格遵守以下约束。不确定样式时，参考 `src/components/HelloWorld.vue` 与 `src/App.vue`，不要自行发明新样式。
+
+## 1. 配色方案（默认 dark 主题）
+
+使用 Vuetify0 主题 token（`src/plugins/vuetify.ts`）及 UnoCSS 语义色类，**禁止硬编码新主色**。
+
+| 角色 | Token / 类名 | Dark 色值 |
+|------|-------------|-----------|
+| 主色 | `primary` / `text-primary` / `bg-primary` | `#c4b5fd` 淡紫 |
+| 辅助色 | `secondary` | `#94a3b8` 灰蓝 |
+| 背景 | `background` / `text-on-background` | `#121212` + `#e0e0e0` 文字 |
+| 卡片面 | `surface` / `bg-surface` | `#1a1a1a` |
+| 卡片浅底 | `surface-tint` / `bg-surface-tint` | `#2a2a2a` |
+| 悬停底 | `surface-variant` / `hover:bg-surface-variant` | `#1e1e1e` |
+| 边框 | `border-subtle`（UnoCSS shortcut） | divider 50% 透明混合 |
+| 主色上的文字 | `text-on-primary` | `#1a1a1a` |
+| 卡片上的文字 | `text-on-surface` | `#e0e0e0` |
+| 错误 | `text-error` | `#f87171` |
+| 信息/成功/警告 | `info` / `success` / `warning` | 仅用于状态，不作页面主色 |
+
+页面背景沿用 App 壳层：`mesh-bg` 渐变 + `main-bg`（`--v0-background` 85% 透明），新页面不要覆盖或替换。
+
+## 2. 字体与排版
+
+- 字体族：**Roboto**（项目已通过 `unplugin-fonts` 全局引入）
+- 页面大标题：`text-4xl font-bold text-on-background`（首页 Hero 级）
+- 卡片/模块标题：`text-2xl font-bold text-on-surface`
+- 正文说明：`text-sm text-on-surface opacity-60` 或 `text-on-background opacity-60`
+- 区块标签（小字）：`text-xs font-medium text-on-surface opacity-50 uppercase tracking-wide`
+- 状态/辅助文字：`text-sm text-on-surface opacity-50`
+- 链接：`text-sm text-primary hover:underline`
+- 等宽数据：`font-mono`（仅用于代码、ID 等）
+
+## 3. 组件风格
+
+### 卡片
+```
+rounded-xl border border-subtle bg-surface p-6
+```
+宽松内容区可用 `p-8`。
+
+### 按钮（主要/选中态）
+```
+px-4 py-3 rounded-lg border font-medium transition-colors
+bg-primary text-on-primary border-primary
+```
+
+### 按钮（次要/未选中态）
+```
+px-4 py-3 rounded-lg border font-medium transition-colors
+bg-surface-tint hover:bg-surface-variant border-subtle
+```
+
+### 文字按钮 / 导航操作
+```
+text-sm text-on-surface opacity-60 hover:opacity-100
+```
+
+- 圆角：**`rounded-lg`（8px）** 用于按钮；**`rounded-xl`（12px）** 用于卡片
+- 阴影：首页不使用明显 box-shadow，靠 `border-subtle` + 面色分层
+- 焦点环：全局 `outline: 2px solid var(--v0-primary)`，不要自定义 focus 样式
+
+### 第三方品牌按钮（例外）
+GitHub OAuth 等品牌按钮可使用品牌色（如 `#24292f`），但仅限该场景。
+
+## 4. 间距与布局
+
+- 页面外边距：`p-4`（由 `App.vue` main 提供，页面内不再重复大 padding）
+- 内容居中：`flex items-center justify-center`（router-view 容器已处理）
+- 内容最大宽度：
+  - 标准内容区：`max-w-2xl mx-auto w-full`
+  - 窄表单/登录：`max-w-md mx-auto w-full`
+  - 中等面板：`max-w-lg mx-auto w-full`
+- 模块间距：区块之间 `mb-8`～`mb-12`；标题下 `mb-2`～`mb-3`；标签下 `mb-4`～`mb-6`
+- Flex 间距：`gap-3`（按钮组）、`gap-x-2 gap-y-1`（链接行）
+
+## 5. 交互反馈
+
+- 按钮悬停：`hover:bg-surface-variant` 或 `hover:opacity-90` + `transition-colors` / `transition-opacity`
+- 链接悬停：`hover:underline`
+- 加载态：`text-on-surface opacity-60` 文案（如「加载中…」「正在完成登录…」），保持简洁
+- 错误提示：`text-sm text-error` + `role="alert"`
+- 禁用动画偏好：项目已处理 `prefers-reduced-motion`，不要添加过度动画
+
+## 6. 数据占位（Mock）
+
+- 所有新页面数据先用 **mock data** 占位
+- 在页面 `<script setup>` 顶部或 `src/mocks/` 中定义，结构须与预期 API 响应一致
+- 使用 `ref` / 合理 TypeScript interface，方便后续替换为真实 API 调用
+- 不要硬编码魔法字符串散落模板，集中管理 mock 常量
+
+## 7. 技术栈约束
+
+- Vue 3 + TypeScript + UnoCSS 工具类 + Vuetify0 headless 组件
+- 优先用语义色类（`text-primary`、`bg-surface` 等），避免内联 `style` 和随意 hex 色
+- 新页面放 `src/pages/`，可复用组件放 `src/components/`
+- 开发分支：`develop`（新功能在 develop 上迭代）
