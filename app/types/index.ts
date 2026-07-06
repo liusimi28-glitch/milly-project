@@ -45,3 +45,53 @@ export interface FooterColumn {
   title: string
   links: NavLink[]
 }
+
+export interface BreadcrumbItem {
+  label: string
+  href?: string
+}
+
+export interface ProductImage {
+  id: string
+  url: string
+  alt: string
+}
+
+export interface ProductReview {
+  id: string
+  author: string
+  rating: number
+  date: string
+  content: string
+  verified: boolean
+}
+
+export interface ProductSpec {
+  label: string
+  value: string
+}
+
+export interface SellerDetail {
+  name: string
+  rating: number
+  level: string
+  totalSales: number
+  positiveRate: number
+  memberSince: string
+}
+
+export interface ProductDetail extends Product {
+  slug: string
+  breadcrumb: BreadcrumbItem[]
+  images: ProductImage[]
+  shortDescription: string
+  description: string
+  features: string[]
+  averageRating: number
+  reviewCount: number
+  inStock: boolean
+  stockCount: number
+  specs: ProductSpec[]
+  reviews: ProductReview[]
+  sellerDetail: SellerDetail
+}
