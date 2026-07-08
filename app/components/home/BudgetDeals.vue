@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { budgetUnder5, budgetUnder10 } = useMockProducts()
+const { budgetUnder5, budgetUnder10, pending } = useHomepage()
 
 const budgetTabs = [
   { id: 'under-5', label: 'Under $5' },
@@ -7,7 +7,7 @@ const budgetTabs = [
 ]
 
 function getProducts(tabId: string) {
-  return tabId === 'under-5' ? budgetUnder5 : budgetUnder10
+  return tabId === 'under-5' ? budgetUnder5.value : budgetUnder10.value
 }
 </script>
 
@@ -16,5 +16,6 @@ function getProducts(tabId: string) {
     title="Budget deals"
     :tabs="budgetTabs"
     :get-products="getProducts"
+    :loading="pending"
   />
 </template>

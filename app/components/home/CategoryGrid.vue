@@ -2,8 +2,10 @@
 import type { Category } from '~/types'
 import { getCategoryIcon } from '@/lib/category-icons'
 
-const { categoryQuickLinks } = useMockProducts()
+const { categoryQuickLinks } = useHomepage()
 const { prefersReducedMotion } = useReducedMotion()
+
+const hasCategories = computed(() => categoryQuickLinks.value.length > 0)
 
 function categoryHref(category: Category) {
   return `/category/${category.slug}`
@@ -16,7 +18,11 @@ const iconClass = computed(() => [
 </script>
 
 <template>
-  <section class="border-b border-g2a-border bg-white py-6" aria-label="Browse categories">
+  <section
+    v-if="hasCategories"
+    class="border-b border-g2a-border bg-white py-6"
+    aria-label="Browse categories"
+  >
     <div class="mx-auto max-w-7xl px-4">
       <div
         class="flex gap-3 overflow-x-auto pb-1 scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] sm:grid sm:grid-cols-4 sm:gap-4 sm:overflow-visible md:grid-cols-8 [&::-webkit-scrollbar]:hidden"

@@ -13,6 +13,7 @@ defineProps<{
   title: string
   products: Product[]
   viewAllHref?: string
+  loading?: boolean
 }>()
 
 const canScrollPrev = ref(false)
@@ -81,6 +82,7 @@ function scrollNext() {
       </div>
 
       <Carousel
+        v-if="!loading && products.length > 0"
         :opts="{ align: 'start', dragFree: true, duration: 25 }"
         @init-api="onInitApi"
       >
@@ -94,6 +96,26 @@ function scrollNext() {
           </CarouselItem>
         </CarouselContent>
       </Carousel>
+
+      <div
+        v-else-if="loading"
+        class="-ml-3 flex gap-3 overflow-hidden pl-3"
+      >
+        <div
+          v-for="n in 6"
+          :key="n"
+          class="w-[160px] shrink-0 sm:w-[180px] md:w-[200px]"
+        >
+          <ProductCardSkeleton />
+        </div>
+      </div>
+
+      <p
+        v-else
+        class="text-sm text-g2a-muted"
+      >
+        No products available.
+      </p>
     </div>
   </section>
 </template>

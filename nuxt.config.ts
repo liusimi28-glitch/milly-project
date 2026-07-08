@@ -1,5 +1,7 @@
 import tailwindcss from '@tailwindcss/vite'
 
+const devApiBaseUrl = process.env.NUXT_PUBLIC_API_BASE_URL || 'https://devapi.88224646ba.shop'
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
@@ -7,6 +9,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL
+        || (process.env.NODE_ENV === 'production' ? '' : devApiBaseUrl),
       supabaseUrl: '',
       supabaseAnonKey: '',
       captchaEnabled: 'false',

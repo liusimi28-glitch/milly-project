@@ -1,7 +1,7 @@
 <script setup lang="ts">
-const { getByGenre } = useMockProducts()
+const { genres, pending } = useHomepage()
 
-const genres = [
+const genreTabs = [
   { id: 'action', label: 'Action' },
   { id: 'rpg', label: 'RPG' },
   { id: 'horror', label: 'Horror' },
@@ -10,14 +10,15 @@ const genres = [
 ]
 
 function getProducts(genre: string) {
-  return getByGenre(genre, 8)
+  return genres.value[genre] ?? []
 }
 </script>
 
 <template>
   <HomeProductTabGrid
     title="Shop by genre"
-    :tabs="genres"
+    :tabs="genreTabs"
     :get-products="getProducts"
+    :loading="pending"
   />
 </template>
