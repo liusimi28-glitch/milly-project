@@ -9,6 +9,8 @@ export default defineNuxtConfig({
     public: {
       supabaseUrl: '',
       supabaseAnonKey: '',
+      captchaEnabled: 'false',
+      turnstileSiteKey: '',
     },
   },
   sourcemap: {

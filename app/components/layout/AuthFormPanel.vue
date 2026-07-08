@@ -12,28 +12,53 @@ const {
   clearError,
   signUp,
   signIn,
+  signInWithOtp,
+  resendConfirmation,
   signInWithGoogle,
   signInAnonymously,
 } = useSupabaseAuth()
 
+const runtimeConfig = useRuntimeConfig()
 const mode = ref<'login' | 'register'>('login')
 const email = ref('')
 const password = ref('')
 const infoMessage = ref<string | null>(null)
+const otpMessage = ref<string | null>(null)
+const confirmEmail = ref<string | null>(null)
+const turnstileToken = ref<string | null>(null)
+const turnstileRef = ref<{ reset: () => void } | null>(null)
+const resendCountdown = useCountdown()
+const otpCountdown = useCountdown()
+
+const captchaEnabled = computed(() => String(runtimeConfig.public.captchaEnabled).toLowerCase() === 'true')
+const turnstileSiteKey = computed(() => String(runtimeConfig.public.turnstileSiteKey || ''))
+const captchaReady = computed(() => !captchaEnabled.value || !!turnstileToken.value)
+
+function resetCaptcha() {
+  turnstileRef.value?.reset()
+}
 
 async function handleEmailSubmit() {
   const trimmedEmail = email.value.trim()
   if (!trimmedEmail || !password.value) return
+  if (!captchaReady.value) {
+    infoMessage.value = 'Please complete verification first.'
+    return
+  }
 
   const result = mode.value === 'register'
-    ? await signUp(trimmedEmail, password.value)
-    : await signIn(trimmedEmail, password.value)
+    ? await signUp(trimmedEmail, password.value, turnstileToken.value ?? undefined)
+    : await signIn(trimmedEmail, password.value, turnstileToken.value ?? undefined)
+  resetCaptcha()
 
   if (result.ok) {
     if ('needsConfirmation' in result && result.needsConfirmation) {
+      confirmEmail.value = trimmedEmail
+      resendCountdown.start(60)
       infoMessage.value = 'Check your email to confirm your account.'
       return
     }
+    confirmEmail.value = null
     emit('success')
   }
 }
@@ -46,21 +71,62 @@ async function handleGoogleSignIn() {
 }
 
 async function handleAnonymousSignIn() {
-  const result = await signInAnonymously()
+  if (!captchaReady.value) {
+    infoMessage.value = 'Please complete verification first.'
+    return
+  }
+  const result = await signInAnonymously(turnstileToken.value ?? undefined)
+  resetCaptcha()
   if (result.ok) {
     emit('success')
+  }
+}
+
+async function handleResendConfirmation() {
+  const targetEmail = confirmEmail.value ?? email.value.trim()
+  if (!targetEmail || resendCountdown.active.value) return
+  if (!captchaReady.value) {
+    infoMessage.value = 'Please complete verification first.'
+    return
+  }
+  const result = await resendConfirmation(targetEmail, turnstileToken.value ?? undefined)
+  resetCaptcha()
+  if (result.ok) {
+    resendCountdown.start(60)
+    infoMessage.value = 'Confirmation email sent again.'
+  }
+}
+
+async function handleOtpSignIn() {
+  const trimmedEmail = email.value.trim()
+  if (!trimmedEmail || otpCountdown.active.value) return
+  if (!captchaReady.value) {
+    infoMessage.value = 'Please complete verification first.'
+    return
+  }
+  const result = await signInWithOtp(trimmedEmail, turnstileToken.value ?? undefined)
+  resetCaptcha()
+  if (result.ok) {
+    otpCountdown.start(60)
+    otpMessage.value = 'Magic link sent. Check your inbox.'
   }
 }
 
 function switchMode(next: 'login' | 'register') {
   mode.value = next
   infoMessage.value = null
+  otpMessage.value = null
+  confirmEmail.value = null
+  resendCountdown.stop()
+  otpCountdown.stop()
   clearError()
+  resetCaptcha()
 }
 
 watch([email, password], () => {
   if (authError.value) clearError()
   if (infoMessage.value) infoMessage.value = null
+  if (otpMessage.value) otpMessage.value = null
 })
 </script>
 
@@ -122,8 +188,20 @@ watch([email, password], () => {
           required
         />
 
+        <AuthTurnstileWidget
+          v-if="captchaEnabled"
+          ref="turnstileRef"
+          v-model="turnstileToken"
+          :enabled="captchaEnabled"
+          :site-key="turnstileSiteKey"
+        />
+
         <p v-if="infoMessage" class="text-xs text-g2a-muted" role="status">
           {{ infoMessage }}
+        </p>
+
+        <p v-if="otpMessage" class="text-xs text-g2a-muted" role="status">
+          {{ otpMessage }}
         </p>
 
         <p v-if="authError" class="text-xs text-destructive" role="alert">
@@ -136,6 +214,28 @@ watch([email, password], () => {
           :disabled="authPending"
         >
           {{ mode === 'register' ? 'Create account' : 'Sign in' }}
+        </Button>
+
+        <Button
+          v-if="mode === 'login'"
+          type="button"
+          variant="outline"
+          class="h-10 w-full border-g2a-border text-g2a-text hover:bg-g2a-gray"
+          :disabled="authPending || otpCountdown.active"
+          @click="handleOtpSignIn"
+        >
+          {{ otpCountdown.active ? `Resend magic link in ${otpCountdown.remaining}s` : 'Email me a sign-in link' }}
+        </Button>
+
+        <Button
+          v-if="mode === 'register' && confirmEmail"
+          type="button"
+          variant="ghost"
+          class="h-9 w-full text-g2a-muted hover:bg-g2a-gray"
+          :disabled="authPending || resendCountdown.active"
+          @click="handleResendConfirmation"
+        >
+          {{ resendCountdown.active ? `Resend confirmation in ${resendCountdown.remaining}s` : 'Resend confirmation email' }}
         </Button>
       </form>
 
