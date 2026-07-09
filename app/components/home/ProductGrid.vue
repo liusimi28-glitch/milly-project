@@ -26,23 +26,23 @@ defineProps<{
       </div>
 
       <div
-        v-if="loading"
-        class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4"
-      >
-        <ProductCardSkeleton
-          v-for="n in 8"
-          :key="n"
-        />
-      </div>
-
-      <div
-        v-else-if="products.length > 0"
+        v-if="products.length > 0"
         class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4"
       >
         <ProductCard
           v-for="product in products"
           :key="product.id"
           :product="product"
+        />
+      </div>
+
+      <div
+        v-else-if="loading"
+        class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4"
+      >
+        <ProductCardSkeleton
+          v-for="n in 8"
+          :key="n"
         />
       </div>
 

@@ -42,7 +42,7 @@ const errorMessage = computed(() => {
       <HomeProductCarousel
         title="Weekly Trends"
         :products="weeklyTrends"
-        :loading="pending"
+        :loading="pending && weeklyTrends.length === 0"
         view-all-href="/best-deals/weekly-trends"
       />
     </HomeScrollReveal>
@@ -51,7 +51,7 @@ const errorMessage = computed(() => {
       <HomeProductGrid
         title="Bestsellers"
         :products="bestsellers"
-        :loading="pending"
+        :loading="pending && bestsellers.length === 0"
         view-all-href="/best-deals/best-gamers-choice"
       />
     </HomeScrollReveal>

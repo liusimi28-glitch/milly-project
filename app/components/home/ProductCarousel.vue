@@ -9,7 +9,7 @@ import {
   CarouselItem,
 } from '@/components/ui/carousel'
 
-defineProps<{
+const props = defineProps<{
   title: string
   products: Product[]
   viewAllHref?: string
@@ -39,6 +39,16 @@ function scrollPrev() {
 function scrollNext() {
   carouselApi.value?.scrollNext()
 }
+
+watch(
+  () => props.products,
+  () => {
+    nextTick(() => {
+      carouselApi.value?.reInit()
+    })
+  },
+  { deep: true },
+)
 </script>
 
 <template>
@@ -81,25 +91,41 @@ function scrollNext() {
         </div>
       </div>
 
-      <Carousel
-        v-if="!loading && products.length > 0"
-        :opts="{ align: 'start', dragFree: true, duration: 25 }"
-        @init-api="onInitApi"
-      >
-        <CarouselContent class="-ml-3">
-          <CarouselItem
-            v-for="product in products"
-            :key="product.id"
-            class="basis-[160px] pl-3 sm:basis-[180px] md:basis-[200px]"
-          >
-            <ProductCard :product="product" />
-          </CarouselItem>
-        </CarouselContent>
-      </Carousel>
+      <ClientOnly v-if="products.length > 0">
+        <Carousel
+          :key="`carousel-${products.length}-${products[0]?.id ?? 'empty'}`"
+          class="w-full"
+          orientation="horizontal"
+          :opts="{ align: 'start', dragFree: true, duration: 25 }"
+          @init-api="onInitApi"
+        >
+          <CarouselContent class="-ml-3">
+            <CarouselItem
+              v-for="product in products"
+              :key="product.id"
+              class="basis-[160px] pl-3 sm:basis-[180px] md:basis-[200px]"
+            >
+              <ProductCard :product="product" />
+            </CarouselItem>
+          </CarouselContent>
+        </Carousel>
+
+        <template #fallback>
+          <div class="-ml-3 flex flex-row gap-3 overflow-x-auto pl-3">
+            <div
+              v-for="product in products"
+              :key="product.id"
+              class="w-[160px] shrink-0 sm:w-[180px] md:w-[200px]"
+            >
+              <ProductCard :product="product" />
+            </div>
+          </div>
+        </template>
+      </ClientOnly>
 
       <div
         v-else-if="loading"
-        class="-ml-3 flex gap-3 overflow-hidden pl-3"
+        class="-ml-3 flex flex-row gap-3 overflow-hidden pl-3"
       >
         <div
           v-for="n in 6"
