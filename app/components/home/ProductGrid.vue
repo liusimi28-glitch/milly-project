@@ -5,6 +5,7 @@ defineProps<{
   title: string
   products: Product[]
   viewAllHref?: string
+  loading?: boolean
 }>()
 </script>
 
@@ -24,13 +25,33 @@ defineProps<{
         </NuxtLink>
       </div>
 
-      <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
+      <div
+        v-if="products.length > 0"
+        class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4"
+      >
         <ProductCard
           v-for="product in products"
           :key="product.id"
           :product="product"
         />
       </div>
+
+      <div
+        v-else-if="loading"
+        class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4"
+      >
+        <ProductCardSkeleton
+          v-for="n in 8"
+          :key="n"
+        />
+      </div>
+
+      <p
+        v-else
+        class="text-sm text-g2a-muted"
+      >
+        No products available.
+      </p>
     </div>
   </section>
 </template>

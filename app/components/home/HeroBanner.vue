@@ -9,21 +9,24 @@ import {
   CarouselItem,
 } from '@/components/ui/carousel'
 
-const { banners } = useMockProducts()
+const { banners } = useHomepage()
 const { prefersReducedMotion } = useReducedMotion()
+
+const hasBanners = computed(() => banners.value.length > 0)
 
 const selectedIndex = ref(0)
 const carouselApi = ref<UnwrapRefCarouselApi | null>(null)
 
 const autoplay = Autoplay({ delay: 5000, stopOnMouseEnter: true, stopOnInteraction: true })
 
-const plugins = computed(() =>
-  prefersReducedMotion.value ? undefined : [autoplay],
-)
+const plugins = computed(() => {
+  if (import.meta.server) return undefined
+  return prefersReducedMotion.value ? undefined : [autoplay]
+})
 
 const carouselOpts = computed(() => ({
   loop: true,
-  duration: prefersReducedMotion.value ? 0 : 25,
+  duration: import.meta.server || prefersReducedMotion.value ? 0 : 25,
 }))
 
 function syncNavState(api: UnwrapRefCarouselApi) {
@@ -50,7 +53,11 @@ function scrollNext() {
 </script>
 
 <template>
-  <section class="relative bg-g2a-gray" aria-label="Promotional banners">
+  <section
+    v-if="hasBanners"
+    class="relative bg-g2a-gray"
+    aria-label="Promotional banners"
+  >
     <Carousel
       class="w-full"
       :opts="carouselOpts"

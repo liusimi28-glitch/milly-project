@@ -49,12 +49,27 @@ export function useSupabaseAuth() {
     authError.value = error?.message ?? null
   }
 
-  async function signUp(email: string, password: string) {
+  function buildAuthOptions(captchaToken?: string) {
+    return captchaToken ? { captchaToken } : undefined
+  }
+
+  function buildRedirectTo() {
+    return import.meta.client ? `${window.location.origin}/auth/callback` : undefined
+  }
+
+  async function signUp(email: string, password: string, captchaToken?: string) {
     const client = requireSupabase()
     if (!client) return { ok: false as const }
     authPending.value = true
     clearError()
-    const { data, error } = await client.auth.signUp({ email, password })
+    const { data, error } = await client.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: buildRedirectTo(),
+        ...buildAuthOptions(captchaToken),
+      },
+    })
     authPending.value = false
     if (error) {
       setError(error)
@@ -66,12 +81,16 @@ export function useSupabaseAuth() {
     }
   }
 
-  async function signIn(email: string, password: string) {
+  async function signIn(email: string, password: string, captchaToken?: string) {
     const client = requireSupabase()
     if (!client) return { ok: false as const }
     authPending.value = true
     clearError()
-    const { error } = await client.auth.signInWithPassword({ email, password })
+    const { error } = await client.auth.signInWithPassword({
+      email,
+      password,
+      options: buildAuthOptions(captchaToken),
+    })
     authPending.value = false
     if (error) {
       setError(error)
@@ -85,9 +104,7 @@ export function useSupabaseAuth() {
     if (!client) return { ok: false as const }
     authPending.value = true
     clearError()
-    const redirectTo = import.meta.client
-      ? `${window.location.origin}/auth/callback`
-      : undefined
+    const redirectTo = buildRedirectTo()
     const { error } = await client.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo },
@@ -100,12 +117,56 @@ export function useSupabaseAuth() {
     return { ok: true as const }
   }
 
-  async function signInAnonymously() {
+  async function signInAnonymously(captchaToken?: string) {
     const client = requireSupabase()
     if (!client) return { ok: false as const }
     authPending.value = true
     clearError()
-    const { error } = await client.auth.signInAnonymously()
+    const { error } = await client.auth.signInAnonymously({
+      options: buildAuthOptions(captchaToken),
+    })
+    authPending.value = false
+    if (error) {
+      setError(error)
+      return { ok: false as const, error }
+    }
+    return { ok: true as const }
+  }
+
+  async function resendConfirmation(email: string, captchaToken?: string) {
+    const client = requireSupabase()
+    if (!client) return { ok: false as const }
+    authPending.value = true
+    clearError()
+    const { error } = await client.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo: buildRedirectTo(),
+        ...buildAuthOptions(captchaToken),
+      },
+    })
+    authPending.value = false
+    if (error) {
+      setError(error)
+      return { ok: false as const, error }
+    }
+    return { ok: true as const }
+  }
+
+  async function signInWithOtp(email: string, captchaToken?: string) {
+    const client = requireSupabase()
+    if (!client) return { ok: false as const }
+    authPending.value = true
+    clearError()
+    const { error } = await client.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: buildRedirectTo(),
+        ...buildAuthOptions(captchaToken),
+      },
+    })
     authPending.value = false
     if (error) {
       setError(error)
@@ -143,6 +204,8 @@ export function useSupabaseAuth() {
     clearError,
     signUp,
     signIn,
+    signInWithOtp,
+    resendConfirmation,
     signInWithGoogle,
     signInAnonymously,
     signOut,

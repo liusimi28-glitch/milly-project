@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { Dice5Icon } from '@lucide/vue'
 
-const { randomKeys } = useMockProducts()
+const { randomKeys } = useHomepage()
+
+const hasRandomKeys = computed(() => randomKeys.value.length > 0)
 </script>
 
 <template>
-  <section class="border-b border-g2a-border bg-g2a-gray py-8" aria-label="Random keys">
+  <section
+    v-if="hasRandomKeys"
+    class="border-b border-g2a-border bg-g2a-gray py-8"
+    aria-label="Random keys"
+  >
     <div class="mx-auto max-w-7xl px-4">
       <div class="mb-5 flex items-center gap-3">
         <span class="flex size-10 items-center justify-center rounded-full bg-g2a-orange/15">

@@ -6,6 +6,7 @@ const props = defineProps<{
   title: string
   tabs: { id: string, label: string }[]
   getProducts: (tabId: string) => Product[]
+  loading?: boolean
 }>()
 
 const activeTab = ref(props.tabs[0]?.id ?? '')
@@ -35,7 +36,18 @@ const currentProducts = computed(() =>
         </TabsList>
 
         <TabsContent :value="activeTab" class="mt-6 outline-none">
+          <div
+            v-if="loading"
+            class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4"
+          >
+            <ProductCardSkeleton
+              v-for="n in 8"
+              :key="n"
+            />
+          </div>
+
           <Transition
+            v-else-if="currentProducts.length > 0"
             mode="out-in"
             enter-active-class="transition duration-[var(--motion-base)] ease-[var(--ease-out)]"
             enter-from-class="opacity-0"
@@ -55,6 +67,13 @@ const currentProducts = computed(() =>
               />
             </div>
           </Transition>
+
+          <p
+            v-else
+            class="text-sm text-g2a-muted"
+          >
+            No products available.
+          </p>
         </TabsContent>
       </Tabs>
     </div>
