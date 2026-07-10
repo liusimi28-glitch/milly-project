@@ -1,20 +1,27 @@
 <script setup lang="ts">
 import type { ProductDetail } from '~/types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { StarIcon } from '@lucide/vue'
 
-defineProps<{
+const props = defineProps<{
   product: ProductDetail
 }>()
 
 const activeTab = ref('details')
 
-const tabItems = [
-  { value: 'details', label: '商品详情' },
-  { value: 'specs', label: '规格参数' },
-  { value: 'reviews', label: '用户评价' },
-  { value: 'seller', label: '卖家信息' },
-] as const
+const tabItems = computed(() => {
+  const items = [
+    { value: 'details', label: '商品详情' },
+    { value: 'specs', label: '规格参数' },
+  ] as const
+
+  if (props.product.reviews.length > 0) {
+    return [...items, { value: 'reviews' as const, label: '用户评价' }]
+  }
+
+  return items
+})
+
+const hasHtmlDescription = computed(() => Boolean(props.product.descriptionHtml?.trim()))
 </script>
 
 <template>
@@ -48,12 +55,20 @@ const tabItems = [
             <h3 class="mb-3 text-lg font-bold text-g2a-text">
               商品描述
             </h3>
-            <p class="text-sm leading-7 text-g2a-muted">
+            <div
+              v-if="hasHtmlDescription"
+              class="prose prose-sm max-w-none text-g2a-muted prose-headings:text-g2a-text prose-a:text-g2a-blue"
+              v-html="product.descriptionHtml"
+            />
+            <p
+              v-else
+              class="text-sm leading-7 text-g2a-muted"
+            >
               {{ product.description }}
             </p>
           </div>
 
-          <div>
+          <div v-if="product.features.length > 0">
             <h3 class="mb-3 text-lg font-bold text-g2a-text">
               功能特点
             </h3>
@@ -75,7 +90,10 @@ const tabItems = [
         value="specs"
         class="px-4 py-6 sm:px-6"
       >
-        <dl class="grid gap-3 sm:grid-cols-2">
+        <dl
+          v-if="product.specs.length > 0"
+          class="grid gap-3 sm:grid-cols-2"
+        >
           <div
             v-for="spec in product.specs"
             :key="spec.label"
@@ -85,13 +103,36 @@ const tabItems = [
               {{ spec.label }}
             </dt>
             <dd class="text-sm font-semibold text-g2a-text">
-              {{ spec.value }}
+              <a
+                v-if="spec.label === '客服链接'"
+                :href="spec.value"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-g2a-blue hover:underline"
+              >
+                {{ spec.value }}
+              </a>
+              <a
+                v-else-if="spec.label === '客服邮箱'"
+                :href="`mailto:${spec.value}`"
+                class="text-g2a-blue hover:underline"
+              >
+                {{ spec.value }}
+              </a>
+              <span v-else>{{ spec.value }}</span>
             </dd>
           </div>
         </dl>
+        <p
+          v-else
+          class="text-sm text-g2a-muted"
+        >
+          暂无规格信息
+        </p>
       </TabsContent>
 
       <TabsContent
+        v-if="product.reviews.length > 0"
         value="reviews"
         class="px-4 py-6 sm:px-6"
       >
@@ -121,78 +162,14 @@ const tabItems = [
             <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
               <div class="flex items-center gap-2">
                 <span class="text-sm font-semibold text-g2a-text">{{ review.author }}</span>
-                <span
-                  v-if="review.verified"
-                  class="rounded bg-g2a-gray px-1.5 py-0.5 text-[10px] font-medium text-g2a-muted"
-                >
-                  已验证购买
-                </span>
               </div>
               <time class="text-xs text-g2a-muted">{{ review.date }}</time>
-            </div>
-            <div class="mb-2 flex items-center gap-0.5">
-              <StarIcon
-                v-for="i in 5"
-                :key="i"
-                class="size-3.5"
-                :class="i <= review.rating ? 'fill-g2a-orange text-g2a-orange' : 'fill-g2a-border text-g2a-border'"
-                aria-hidden="true"
-              />
             </div>
             <p class="text-sm leading-relaxed text-g2a-muted">
               {{ review.content }}
             </p>
           </li>
         </ul>
-      </TabsContent>
-
-      <TabsContent
-        value="seller"
-        class="px-4 py-6 sm:px-6"
-      >
-        <div class="max-w-xl rounded-lg border border-g2a-border bg-g2a-gray/50 p-6">
-          <div class="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <h3 class="text-xl font-bold text-g2a-text">
-                {{ product.sellerDetail.name }}
-              </h3>
-              <p class="mt-1 text-sm text-g2a-muted">
-                {{ product.sellerDetail.level }}
-              </p>
-            </div>
-            <ProductDetailStarRating
-              :rating="product.sellerDetail.rating"
-              size="sm"
-            />
-          </div>
-
-          <dl class="mt-6 grid gap-4 sm:grid-cols-3">
-            <div>
-              <dt class="text-xs font-medium uppercase tracking-wide text-g2a-muted">
-                历史销量
-              </dt>
-              <dd class="mt-1 text-lg font-bold text-g2a-text">
-                {{ product.sellerDetail.totalSales.toLocaleString() }}
-              </dd>
-            </div>
-            <div>
-              <dt class="text-xs font-medium uppercase tracking-wide text-g2a-muted">
-                好评率
-              </dt>
-              <dd class="mt-1 text-lg font-bold text-g2a-text">
-                {{ product.sellerDetail.positiveRate }}%
-              </dd>
-            </div>
-            <div>
-              <dt class="text-xs font-medium uppercase tracking-wide text-g2a-muted">
-                入驻时间
-              </dt>
-              <dd class="mt-1 text-lg font-bold text-g2a-text">
-                {{ product.sellerDetail.memberSince }}
-              </dd>
-            </div>
-          </dl>
-        </div>
       </TabsContent>
     </Tabs>
   </section>

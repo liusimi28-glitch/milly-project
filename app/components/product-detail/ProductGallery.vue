@@ -13,11 +13,23 @@ const activeImage = computed(() => props.images[activeIndex.value] ?? props.imag
 function selectImage(index: number) {
   activeIndex.value = index
 }
+
+function thumbnailSrc(image: ProductImage) {
+  return image.thumbnailUrl || image.url
+}
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
-    <div class="relative aspect-[4/5] overflow-hidden rounded-lg border border-g2a-border bg-g2a-gray sm:aspect-square">
+  <section
+    v-if="images.length > 0"
+    class="flex flex-col gap-4"
+    aria-label="游戏截图"
+  >
+    <h2 class="text-lg font-bold text-g2a-text">
+      截图
+    </h2>
+
+    <div class="relative aspect-video overflow-hidden rounded-lg border border-g2a-border bg-g2a-gray">
       <img
         :src="activeImage?.url"
         :alt="activeImage?.alt"
@@ -26,9 +38,10 @@ function selectImage(index: number) {
     </div>
 
     <div
+      v-if="images.length > 1"
       class="flex gap-2 overflow-x-auto pb-1"
       role="listbox"
-      aria-label="商品图片缩略图"
+      aria-label="截图缩略图"
     >
       <button
         v-for="(image, index) in images"
@@ -37,17 +50,17 @@ function selectImage(index: number) {
         role="option"
         :aria-selected="index === activeIndex"
         :class="cn(
-          'relative size-16 shrink-0 overflow-hidden rounded-md border-2 transition-all duration-[var(--motion-fast)] hover:border-g2a-orange/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-g2a-orange focus-visible:ring-offset-2',
+          'relative aspect-video w-24 shrink-0 overflow-hidden rounded-md border-2 transition-all duration-[var(--motion-fast)] hover:border-g2a-orange/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-g2a-orange focus-visible:ring-offset-2',
           index === activeIndex ? 'border-g2a-orange' : 'border-g2a-border',
         )"
         @click="selectImage(index)"
       >
         <img
-          :src="image.url"
+          :src="thumbnailSrc(image)"
           :alt="image.alt"
           class="size-full object-cover"
         >
       </button>
     </div>
-  </div>
+  </section>
 </template>

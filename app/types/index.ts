@@ -55,6 +55,14 @@ export interface ProductImage {
   id: string
   url: string
   alt: string
+  thumbnailUrl?: string
+}
+
+export interface ProductTrailer {
+  id: string
+  url: string
+  title: string
+  thumbnailUrl?: string
 }
 
 export interface ProductReview {
@@ -83,9 +91,13 @@ export interface SellerDetail {
 export interface ProductDetail extends Product {
   slug: string
   breadcrumb: BreadcrumbItem[]
+  headerImage: string
+  backgroundImage?: string
   images: ProductImage[]
+  trailers: ProductTrailer[]
   shortDescription: string
   description: string
+  descriptionHtml?: string
   features: string[]
   averageRating: number
   reviewCount: number
@@ -94,4 +106,20 @@ export interface ProductDetail extends Product {
   specs: ProductSpec[]
   reviews: ProductReview[]
   sellerDetail: SellerDetail
+  platformWindows: boolean
+  platformMac: boolean
+  platformLinux: boolean
+  isFree: boolean
+  comingSoon: boolean
+  currency: string
+  metacriticScore?: number
+  releaseDate?: string
+  requiredAge?: number
+  developers: string[]
+  publishers: string[]
+  supportedLanguages: string[]
+  supportUrl?: string
+  supportEmail?: string
+  priceFormatted?: string
+  originalPriceFormatted?: string
 }

@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/carousel'
 
 const { banners } = useHomepage()
+const { withLocale } = useProductRoute()
 const { prefersReducedMotion } = useReducedMotion()
 
 const hasBanners = computed(() => banners.value.length > 0)
@@ -94,7 +95,7 @@ function scrollNext() {
                 {{ banner.subtitle }}
               </p>
               <NuxtLink
-                :to="banner.href"
+                :to="withLocale(banner.href)"
                 class="mt-5 inline-flex h-10 items-center rounded-md bg-g2a-orange px-5 text-sm font-semibold text-white transition-all duration-[var(--motion-fast)] focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent focus-visible:outline-none"
                 :class="!prefersReducedMotion && 'hover:brightness-110'"
               >

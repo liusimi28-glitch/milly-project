@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ProductDetail } from '~/types'
-import { ShoppingCartIcon, ZapIcon } from '@lucide/vue'
+import { MonitorIcon, ShoppingCartIcon, ZapIcon } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -15,13 +15,11 @@ const isBuying = ref(false)
 
 const maxQuantity = computed(() => Math.min(props.product.stockCount, 10))
 
-const tags = computed(() => [
-  props.product.platform,
-  props.product.region,
-  ...props.product.tags.includes('random-keys') ? ['随机密钥'] : [],
-])
+const displayPrice = computed(() => props.product.priceFormatted ?? formatFallbackPrice(props.product.price))
+const displayOriginalPrice = computed(() => props.product.originalPriceFormatted
+  ?? (props.product.originalPrice ? formatFallbackPrice(props.product.originalPrice) : undefined))
 
-function formatPrice(value: number) {
+function formatFallbackPrice(value: number) {
   return `$${value.toFixed(2)}`
 }
 
@@ -45,17 +43,56 @@ async function handleBuyNow() {
 <template>
   <div class="flex flex-col gap-5">
     <div>
+      <div class="mb-3 flex flex-wrap items-center gap-2">
+        <span
+          v-if="product.comingSoon"
+          class="rounded bg-g2a-blue px-2 py-0.5 text-xs font-semibold text-white"
+        >
+          即将推出
+        </span>
+        <span
+          v-if="product.isFree"
+          class="rounded bg-green-600 px-2 py-0.5 text-xs font-semibold text-white"
+        >
+          免费
+        </span>
+        <span
+          v-if="product.requiredAge"
+          class="rounded border border-g2a-border bg-g2a-gray px-2 py-0.5 text-xs font-medium text-g2a-text"
+        >
+          {{ product.requiredAge }}+
+        </span>
+      </div>
+
       <h1 class="text-2xl font-bold leading-tight text-g2a-text sm:text-3xl">
         {{ product.title }}
       </h1>
 
       <div class="mt-3 flex flex-wrap items-center gap-3">
-        <ProductDetailStarRating
-          :rating="product.averageRating"
-          size="md"
-        />
-        <span class="text-sm text-g2a-muted">
-          {{ product.reviewCount.toLocaleString() }} 条评价
+        <div
+          v-if="product.metacriticScore"
+          class="inline-flex items-center gap-2 rounded border border-g2a-border bg-g2a-gray/60 px-2.5 py-1"
+        >
+          <ProductDetailStarRating
+            :rating="product.averageRating"
+            size="sm"
+            :show-value="false"
+          />
+          <span class="text-sm font-semibold text-g2a-text">
+            Metacritic {{ product.metacriticScore }}
+          </span>
+        </div>
+        <span
+          v-if="product.reviewCount > 0"
+          class="text-sm text-g2a-muted"
+        >
+          {{ product.reviewCount.toLocaleString() }} 条推荐
+        </span>
+        <span
+          v-if="product.releaseDate"
+          class="text-sm text-g2a-muted"
+        >
+          发行日期：{{ product.releaseDate }}
         </span>
       </div>
     </div>
@@ -64,9 +101,12 @@ async function handleBuyNow() {
       {{ product.shortDescription }}
     </p>
 
-    <div class="flex flex-wrap gap-2">
+    <div
+      v-if="product.tags.length > 0"
+      class="flex flex-wrap gap-2"
+    >
       <span
-        v-for="tag in tags"
+        v-for="tag in product.tags"
         :key="tag"
         class="rounded border border-g2a-border bg-g2a-gray px-2.5 py-1 text-xs font-medium text-g2a-text"
       >
@@ -77,13 +117,13 @@ async function handleBuyNow() {
     <div class="rounded-lg border border-g2a-border bg-g2a-gray/60 p-4">
       <div class="flex flex-wrap items-end gap-3">
         <span
-          v-if="product.originalPrice"
+          v-if="displayOriginalPrice && !product.isFree"
           class="text-base text-g2a-muted line-through"
         >
-          {{ formatPrice(product.originalPrice) }}
+          {{ displayOriginalPrice }}
         </span>
-        <span class="text-3xl font-bold text-g2a-text">
-          {{ formatPrice(product.price) }}
+        <span class="text-3xl font-bold text-g2a-orange">
+          {{ displayPrice }}
         </span>
         <DiscountBadge
           v-if="product.discount"
@@ -97,7 +137,7 @@ async function handleBuyNow() {
           product.inStock ? 'text-green-600' : 'text-destructive',
         )"
       >
-        {{ product.inStock ? `有货 · 剩余 ${product.stockCount} 件` : '暂时无货' }}
+        {{ product.comingSoon ? '尚未发售' : product.inStock ? '数字版 · 即时交付' : '暂时无货' }}
       </p>
     </div>
 
@@ -129,10 +169,45 @@ async function handleBuyNow() {
         @click="handleBuyNow"
       >
         <ZapIcon class="size-4" />
-        {{ isBuying ? '处理中…' : '立即购买' }}
+        {{ isBuying ? '处理中…' : product.isFree ? '免费获取' : '立即购买' }}
       </Button>
     </div>
 
-    <ProductDetailPlatformBadges :platforms="[product.platform]" />
+    <ProductDetailPlatformBadges
+      :platform-windows="product.platformWindows"
+      :platform-mac="product.platformMac"
+      :platform-linux="product.platformLinux"
+    />
+
+    <div
+      v-if="product.supportUrl || product.supportEmail"
+      class="rounded-lg border border-g2a-border bg-white p-4 text-sm text-g2a-muted"
+    >
+      <div class="mb-2 flex items-center gap-2 font-medium text-g2a-text">
+        <MonitorIcon class="size-4" />
+        客服支持
+      </div>
+      <p v-if="product.supportUrl">
+        <a
+          :href="product.supportUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-g2a-blue hover:underline"
+        >
+          {{ product.supportUrl }}
+        </a>
+      </p>
+      <p
+        v-if="product.supportEmail"
+        class="mt-1"
+      >
+        <a
+          :href="`mailto:${product.supportEmail}`"
+          class="text-g2a-blue hover:underline"
+        >
+          {{ product.supportEmail }}
+        </a>
+      </p>
+    </div>
   </div>
 </template>

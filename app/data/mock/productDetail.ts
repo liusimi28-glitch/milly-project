@@ -71,7 +71,9 @@ export function buildProductDetail(product: Product): ProductDetail {
       { label: categoryLabel, href: isRandomKey ? '/best-deals/random-keys' : '/games' },
       { label: product.title },
     ],
+    headerImage: product.image,
     images: buildImages(product),
+    trailers: [],
     shortDescription: isRandomKey
       ? '随机 Steam 游戏密钥，全球区即时交付，适合喜欢惊喜的玩家。'
       : `${product.platform} 正版数字密钥，${product.region} 区域，付款后自动发货。`,
@@ -101,6 +103,15 @@ export function buildProductDetail(product: Product): ProductDetail {
       positiveRate: 92 + (seed % 8),
       memberSince: `${2018 + (seed % 6)} 年`,
     },
+    platformWindows: product.platform === 'Steam' || product.platform === 'Epic',
+    platformMac: product.platform === 'GOG',
+    platformLinux: product.platform === 'Epic',
+    isFree: product.price === 0,
+    comingSoon: false,
+    currency: 'USD',
+    developers: [],
+    publishers: [],
+    supportedLanguages: [],
   }
 }
 

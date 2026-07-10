@@ -43,7 +43,9 @@ function formatPrice(value: number) {
   return `$${value.toFixed(2)}`
 }
 
-const productHref = computed(() => `/product/${props.product.id}`)
+const { productLink } = useProductRoute()
+
+const productHref = computed(() => productLink(props.product.id))
 
 const cardClass = computed(() => [
   'group flex h-full flex-col overflow-hidden rounded-lg border border-g2a-border bg-white transition-all duration-[var(--motion-base)] ease-[var(--ease-out)] focus-visible:ring-2 focus-visible:ring-g2a-orange focus-visible:ring-offset-2 focus-visible:outline-none',

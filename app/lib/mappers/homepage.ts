@@ -106,7 +106,7 @@ function normalizeHref(href: string): string {
   return href
 }
 
-function mapGameCardToProduct(card: HomepageGameCard): Product {
+export function mapGameCardToProduct(card: HomepageGameCard): Product {
   const price = card.is_free ? 0 : card.base_price_cents / 100
   const originalPrice = card.original_price_cents > 0
     ? card.original_price_cents / 100
@@ -128,7 +128,7 @@ function mapGameCardToProduct(card: HomepageGameCard): Product {
   }
 }
 
-function derivePlatform(card: HomepageGameCard): Product['platform'] {
+export function derivePlatform(card: Pick<HomepageGameCard, 'platform_windows' | 'platform_mac' | 'platform_linux'>): Product['platform'] {
   if (card.platform_windows) return 'Steam'
   if (card.platform_mac) return 'GOG'
   if (card.platform_linux) return 'Epic'
