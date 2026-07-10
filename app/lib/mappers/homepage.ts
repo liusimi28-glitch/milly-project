@@ -5,9 +5,7 @@ import type {
   HomepageResponse,
 } from '~/types/api/homepage'
 import type { Banner, Category, Product, ProductBadge } from '~/types'
-
-export const GAME_IMAGE_PLACEHOLDER
-  = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="533" viewBox="0 0 400 533"%3E%3Crect fill="%23f3f4f6" width="400" height="533"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%239ca3af" font-family="sans-serif" font-size="18"%3ENo image%3C/text%3E%3C/svg%3E'
+import { GAME_IMAGE_PLACEHOLDER, resolveVerticalGameImage } from '~/lib/game-images'
 
 const slugIconFallback: Record<string, string> = {
   games: 'layout-grid',
@@ -122,7 +120,7 @@ function mapGameCardToProduct(card: HomepageGameCard): Product {
     price,
     originalPrice: originalPrice && originalPrice > price ? originalPrice : undefined,
     discount: card.discount_percent || undefined,
-    image: card.capsule_image || card.header_image || GAME_IMAGE_PLACEHOLDER,
+    image: resolveVerticalGameImage(card),
     seller: 'SiteA',
     sellerRating: 4.5,
     badge: card.badge as ProductBadge | undefined,

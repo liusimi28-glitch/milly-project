@@ -27,6 +27,8 @@ export interface HomepageGameCard {
   title: string
   header_image: string
   capsule_image: string
+  library_capsule_image: string
+  vertical_capsule_image?: string
   currency: string
   base_price_cents: number
   original_price_cents: number

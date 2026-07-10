@@ -18,7 +18,7 @@ NUXT_PUBLIC_API_BASE_URL=http://localhost:46002
 
 | API | UI |
 |-----|-----|
-| `HomepageGameCard` | `Product`（价格 cents/100，图片优先 capsule） |
+| `HomepageGameCard` | `Product`（价格 cents/100，竖版封面优先 `library_capsule_image`） |
 | `HomepageBanner` | `Banner`（`/promotion/:id` 链接映射为 `/product/:id`） |
 | `HomepageCategory` | `Category`（icon 空时用 slug 回退） |
 
