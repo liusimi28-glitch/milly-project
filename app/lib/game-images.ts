@@ -4,6 +4,7 @@ export const GAME_IMAGE_PLACEHOLDER
 export interface VerticalGameImageFields {
   library_capsule_image?: string
   vertical_capsule_image?: string
+  main_capsule_image?: string
   header_image?: string
   capsule_image?: string
 }
@@ -12,6 +13,7 @@ export interface VerticalGameImageFields {
 export function resolveVerticalGameImage(fields: VerticalGameImageFields): string {
   return fields.library_capsule_image
     || fields.vertical_capsule_image
+    || fields.main_capsule_image
     || fields.header_image
     || fields.capsule_image
     || GAME_IMAGE_PLACEHOLDER

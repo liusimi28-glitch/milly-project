@@ -11,6 +11,7 @@ const open = defineModel<boolean>('open', { default: false })
 const rootRef = ref<HTMLElement | null>(null)
 const panelId = 'auth-dropdown-panel'
 
+const { withLocale } = useProductRoute()
 const route = useRoute()
 const {
   authLoading,
@@ -126,7 +127,44 @@ watch(isLoggedIn, (loggedIn) => {
             </p>
           </div>
 
-          <div class="border-t border-g2a-border px-4 pt-3">
+          <div class="border-t border-g2a-border px-4 py-3">
+            <nav class="mb-3 flex flex-col gap-2 text-sm">
+              <NuxtLink
+                :to="withLocale('/account')"
+                class="text-g2a-text transition-colors hover:text-g2a-orange"
+                @click="close"
+              >
+                个人资料
+              </NuxtLink>
+              <NuxtLink
+                :to="withLocale('/library')"
+                class="text-g2a-text transition-colors hover:text-g2a-orange"
+                @click="close"
+              >
+                我的游戏库
+              </NuxtLink>
+              <NuxtLink
+                :to="withLocale('/orders')"
+                class="text-g2a-text transition-colors hover:text-g2a-orange"
+                @click="close"
+              >
+                我的订单
+              </NuxtLink>
+              <NuxtLink
+                :to="withLocale('/wallet')"
+                class="text-g2a-text transition-colors hover:text-g2a-orange"
+                @click="close"
+              >
+                我的钱包
+              </NuxtLink>
+              <NuxtLink
+                :to="withLocale('/posts')"
+                class="text-g2a-text transition-colors hover:text-g2a-orange"
+                @click="close"
+              >
+                社区
+              </NuxtLink>
+            </nav>
             <Button
               type="button"
               variant="outline"

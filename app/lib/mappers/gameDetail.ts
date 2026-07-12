@@ -1,6 +1,7 @@
 import { formatPriceFromCents, formatReleaseDate } from '~/lib/format/price'
-import { derivePlatform, mapGameCardToProduct } from '~/lib/mappers/homepage'
-import type { GameDetailResponse, GameListItem } from '~/types/api/game'
+import { resolveVerticalGameImage } from '~/lib/game-images'
+import { derivePlatform } from '~/lib/mappers/homepage'
+import type { GameDetail, GameListItem } from '~/types/api/game'
 import type {
   BreadcrumbItem,
   Product,
@@ -10,44 +11,60 @@ import type {
   ProductTrailer,
 } from '~/types'
 
-export { mapGameCardToProduct }
-
 export function mapGameListItemToProduct(item: GameListItem): Product {
-  return mapGameCardToProduct(item)
+  const price = item.is_free ? 0 : item.base_price_cents / 100
+  const originalPrice = item.original_price_cents > 0
+    ? item.original_price_cents / 100
+    : undefined
+  const discount = computeDiscountPercent(item.base_price_cents, item.original_price_cents)
+
+  return {
+    id: String(item.id),
+    title: item.title,
+    platform: derivePlatform(item),
+    region: 'Global',
+    price,
+    originalPrice: originalPrice && originalPrice > price ? originalPrice : undefined,
+    discount,
+    image: resolveVerticalGameImage(item),
+    seller: 'SiteA',
+    sellerRating: 4.5,
+    tags: item.tags?.map(tag => tag.name || tag.code) ?? [],
+  }
 }
 
-export function mapGameDetailResponse(raw: GameDetailResponse, locale: string): ProductDetail {
-  const translation = raw.translations
-  const screenshots = mapScreenshots(raw, translation.title)
-  const trailers = mapTrailers(raw, locale)
+export function mapGameDetailResponse(raw: GameDetail, locale: string): ProductDetail {
+  const title = raw.title || '未命名游戏'
+  const screenshots = mapScreenshots(raw, title)
+  const trailers = mapTrailers(raw)
   const price = raw.is_free ? 0 : raw.base_price_cents / 100
   const originalPrice = raw.original_price_cents > 0
     ? raw.original_price_cents / 100
     : undefined
-  const developers = raw.companies?.filter(c => c.role === 'developer').map(c => c.name) ?? []
-  const publishers = raw.companies?.filter(c => c.role === 'publisher').map(c => c.name) ?? []
+  const developers = raw.developers ?? []
+  const publishers = raw.publishers ?? []
 
   return {
     id: String(raw.id),
-    title: translation.title,
+    title,
     platform: derivePlatform(raw),
     region: 'Global',
     price,
     originalPrice: originalPrice && originalPrice > price ? originalPrice : undefined,
-    discount: raw.discount_percent || computeDiscountPercent(raw) || undefined,
-    image: raw.header_image,
+    discount: computeDiscountPercent(raw.base_price_cents, raw.original_price_cents),
+    image: resolveVerticalGameImage(raw),
     seller: 'SiteA',
     sellerRating: 4.5,
-    tags: raw.tags?.map(tag => tag.name) ?? [],
+    tags: raw.tags?.map(tag => tag.name || tag.code) ?? [],
     slug: String(raw.id),
-    breadcrumb: buildBreadcrumb(translation.title, locale),
+    breadcrumb: buildBreadcrumb(title, locale),
     headerImage: raw.header_image,
-    backgroundImage: raw.background_image || raw.background_raw_image,
+    backgroundImage: raw.library_hero_image || raw.background_image || raw.background_raw_image,
     images: screenshots,
     trailers,
-    shortDescription: translation.short_description,
-    description: translation.about_description || translation.short_description,
-    descriptionHtml: translation.about_description,
+    shortDescription: raw.short_description || '',
+    description: raw.about_description || raw.detailed_description || raw.short_description || '',
+    descriptionHtml: raw.about_description || raw.detailed_description,
     features: [],
     averageRating: metacriticToRating(raw.metacritic_score),
     reviewCount: raw.recommendations_total ?? 0,
@@ -99,7 +116,7 @@ function withLocaleQuery(path: string, locale: string): string {
   return `${path}?locale=${encodeURIComponent(locale)}`
 }
 
-function mapScreenshots(raw: GameDetailResponse, title: string): ProductImage[] {
+function mapScreenshots(raw: GameDetail, title: string): ProductImage[] {
   const screenshots = raw.assets?.filter(asset => asset.role === 'screenshot') ?? []
 
   if (screenshots.length > 0) {
@@ -111,11 +128,12 @@ function mapScreenshots(raw: GameDetailResponse, title: string): ProductImage[] 
     }))
   }
 
-  if (raw.header_image) {
+  const cover = resolveVerticalGameImage(raw)
+  if (cover) {
     return [{
-      id: 'header',
-      url: raw.header_image,
-      thumbnailUrl: raw.header_image,
+      id: 'cover',
+      url: cover,
+      thumbnailUrl: cover,
       alt: title,
     }]
   }
@@ -123,23 +141,17 @@ function mapScreenshots(raw: GameDetailResponse, title: string): ProductImage[] 
   return []
 }
 
-function mapTrailers(raw: GameDetailResponse, locale: string): ProductTrailer[] {
-  return (raw.assets?.filter(asset => asset.role === 'trailer') ?? []).map((asset) => {
-    const localizedTitle = asset.translations?.find(item => item.locale === locale)?.title
-      ?? asset.translations?.[0]?.title
-      ?? '游戏预告片'
-
-    return {
-      id: String(asset.id),
-      url: asset.url,
-      title: localizedTitle,
-      thumbnailUrl: asset.thumbnail_url,
-    }
-  })
+function mapTrailers(raw: GameDetail): ProductTrailer[] {
+  return (raw.assets?.filter(asset => asset.role === 'trailer') ?? []).map(asset => ({
+    id: String(asset.id),
+    url: asset.url,
+    title: asset.title || '游戏预告片',
+    thumbnailUrl: asset.thumbnail_url,
+  }))
 }
 
 function buildSpecs(
-  raw: GameDetailResponse,
+  raw: GameDetail,
   locale: string,
   developers: string[],
   publishers: string[],
@@ -151,6 +163,13 @@ function buildSpecs(
   }
   if (publishers.length > 0) {
     specs.push({ label: '发行商', value: publishers.join('、') })
+  }
+  if (raw.early_access) {
+    specs.push({ label: '抢先体验', value: '是' })
+  }
+  if (raw.controller_support && raw.controller_support !== 'none') {
+    const label = raw.controller_support === 'full' ? '完全支持' : '部分支持'
+    specs.push({ label: '手柄支持', value: label })
   }
   if (raw.release_date) {
     specs.push({
@@ -167,6 +186,18 @@ function buildSpecs(
       value: raw.supported_languages.map(lang => lang.language_code.toUpperCase()).join('、'),
     })
   }
+  if (raw.pc_requirements_min) {
+    specs.push({ label: 'PC 最低配置', value: raw.pc_requirements_min })
+  }
+  if (raw.pc_requirements_rec) {
+    specs.push({ label: 'PC 推荐配置', value: raw.pc_requirements_rec })
+  }
+  if (raw.mac_requirements_min) {
+    specs.push({ label: 'Mac 最低配置', value: raw.mac_requirements_min })
+  }
+  if (raw.linux_requirements_min) {
+    specs.push({ label: 'Linux 最低配置', value: raw.linux_requirements_min })
+  }
   if (raw.support_url) {
     specs.push({ label: '客服链接', value: raw.support_url })
   }
@@ -177,12 +208,15 @@ function buildSpecs(
   return specs
 }
 
-function computeDiscountPercent(raw: GameDetailResponse): number | undefined {
-  if (raw.original_price_cents <= 0 || raw.base_price_cents >= raw.original_price_cents) {
+function computeDiscountPercent(
+  basePriceCents: number,
+  originalPriceCents: number,
+): number | undefined {
+  if (originalPriceCents <= 0 || basePriceCents >= originalPriceCents) {
     return undefined
   }
 
-  return Math.round((1 - raw.base_price_cents / raw.original_price_cents) * 100)
+  return Math.round((1 - basePriceCents / originalPriceCents) * 100)
 }
 
 function metacriticToRating(score?: number): number {

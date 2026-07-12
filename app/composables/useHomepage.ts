@@ -3,13 +3,13 @@ import { emptyHomepageViewModel, mapHomepageResponse } from '~/lib/mappers/homep
 import type { HomepageViewModel } from '~/lib/mappers/homepage'
 
 export function useHomepage() {
-  const config = useRuntimeConfig()
+  const { publicClient } = useApiClient()
   const locale = useHomepageLocale()
 
   const { data, pending, error, refresh } = useAsyncData<HomepageViewModel>(
     () => `homepage-${locale.value}`,
     async () => {
-      const raw = await fetchHomepage(config.public.apiBaseUrl, locale.value)
+      const raw = await fetchHomepage(publicClient.value, locale.value)
       return mapHomepageResponse(raw)
     },
     {

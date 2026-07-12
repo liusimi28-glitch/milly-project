@@ -1,0 +1,5297 @@
+basePath: /api/v1
+definitions:
+  AcquireMethod:
+    enum:
+    - purchase
+    - gift
+    - admin_grant
+    type: string
+    x-enum-varnames:
+    - AcquireMethodPurchase
+    - AcquireMethodGift
+    - AcquireMethodAdminGrant
+  AddGamePromoReq:
+    properties:
+      discount_type:
+        allOf:
+        - $ref: '#/definitions/DiscountType'
+        enum:
+        - percentage
+        - fixed_amount
+      discount_value:
+        type: number
+      game_id:
+        type: integer
+    required:
+    - discount_type
+    - discount_value
+    - game_id
+    type: object
+  AuditAction:
+    enum:
+    - approve
+    - reject
+    - request_changes
+    type: string
+    x-enum-varnames:
+    - AuditActionApprove
+    - AuditActionReject
+    - AuditActionRequestChanges
+  AuditLog:
+    properties:
+      action:
+        $ref: '#/definitions/AuditAction'
+      admin_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      new_status:
+        type: string
+      prev_status:
+        type: string
+      reason:
+        type: string
+      target_id:
+        description: Store ID as string for compatibility (can be uint or string depending
+          on model)
+        type: string
+      target_type:
+        $ref: '#/definitions/TargetType'
+      updated_at:
+        type: string
+    type: object
+  AuditReq:
+    properties:
+      action:
+        allOf:
+        - $ref: '#/definitions/AuditAction'
+        enum:
+        - approve
+        - reject
+        - request_changes
+      reason:
+        type: string
+    required:
+    - action
+    type: object
+  ClientUpdateProfileRequest:
+    properties:
+      avatar:
+        type: string
+      nickname:
+        type: string
+    required:
+    - nickname
+    type: object
+  ConfirmUploadResult:
+    properties:
+      object_key:
+        type: string
+      public_url:
+        type: string
+      storage_object_id:
+        type: integer
+    type: object
+  ControllerSupport:
+    enum:
+    - none
+    - partial
+    - full
+    type: string
+    x-enum-varnames:
+    - ControllerSupportNone
+    - ControllerSupportPartial
+    - ControllerSupportFull
+  CreateAssetRequest:
+    properties:
+      asset_type:
+        allOf:
+        - $ref: '#/definitions/GameAssetType'
+        description: '`image`/`video` for storefront media; `build` for install package.'
+        enum:
+        - image
+        - video
+        - build
+      external_id:
+        description: External asset id (e.g. Steam screenshot/movie id).
+        example: "0"
+        type: string
+      is_highlight:
+        description: Featured trailer flag (Steam `highlight`).
+        example: false
+        type: boolean
+      metadata:
+        description: 'JSON: `hls_h264`, `dash_h264`, `dash_av1` for trailers.'
+        example: '{"hls_h264":"https://cdn.example.com/master.m3u8"}'
+        type: string
+      role:
+        allOf:
+        - $ref: '#/definitions/GameAssetRole'
+        description: See role-specific size notes below.
+        enum:
+        - header
+        - capsule
+        - screenshot
+        - trailer
+        - background
+        - build
+      sort_order:
+        example: 0
+        type: integer
+      thumbnail_url:
+        description: 'Gallery thumb: ~600×338 for screenshots; 1920×1080 poster for
+          trailers.'
+        example: https://cdn.example.com/ss-600x338.jpg
+        type: string
+      translations:
+        description: Trailer title per locale (`game_asset_translations`).
+        items:
+          $ref: '#/definitions/GameAssetTranslationInput'
+        type: array
+      url:
+        description: Full image or video playback URL (MP4/HLS).
+        example: https://cdn.example.com/ss-1920x1080.jpg
+        type: string
+    required:
+    - asset_type
+    - role
+    - url
+    type: object
+  CreateGameRequest:
+    properties:
+      achievements_total:
+        example: 50
+        type: integer
+      app_icon_image:
+        description: App icon URL. Recommended 184×184 px.
+        example: https://cdn.example.com/app-icon-184.png
+        type: string
+      background_image:
+        description: Page background (processed). Recommended 1438×810 px, subtle
+          artwork.
+        example: https://cdn.example.com/bg-1438x810.jpg
+        type: string
+      background_raw_image:
+        description: Raw background before template overlay. Recommended 1438×810
+          px.
+        example: https://cdn.example.com/bg-raw.jpg
+        type: string
+      base_price_cents:
+        example: 1999
+        type: integer
+      capsule_image:
+        description: Small Capsule URL. Recommended 462×174 px, PNG/JPG. Search &
+          list views.
+        example: https://cdn.example.com/capsule-462x174.jpg
+        type: string
+      capsule_image_v5:
+        description: Compact capsule derivative (e.g. Steam 184×69 display). Source
+          should still be 462×174.
+        example: https://cdn.example.com/capsule-184x69.jpg
+        type: string
+      coming_soon:
+        example: false
+        type: boolean
+      companies:
+        items:
+          $ref: '#/definitions/GameCompanyInput'
+        type: array
+      controller_support:
+        allOf:
+        - $ref: '#/definitions/ControllerSupport'
+        enum:
+        - none
+        - partial
+        - full
+      currency:
+        example: USD
+        type: string
+      early_access:
+        example: false
+        type: boolean
+      external_app_id:
+        example: "105600"
+        type: string
+      external_source:
+        enum:
+        - steam
+        - native
+        example: steam
+        type: string
+      header_image:
+        description: Header Capsule URL. Recommended 920×430 px, PNG/JPG. Store page
+          hero & recommendations.
+        example: https://cdn.example.com/header-920x430.jpg
+        type: string
+      icon_image:
+        description: Game icon URL. Recommended 256×256 px.
+        example: https://cdn.example.com/icon-256.png
+        type: string
+      is_free:
+        example: false
+        type: boolean
+      library_capsule_image:
+        description: Library Capsule URL. Recommended 600×900 px.
+        example: https://cdn.example.com/lib-cap-600x900.jpg
+        type: string
+      library_header_image:
+        description: Library Header URL. Recommended 920×430 px.
+        example: https://cdn.example.com/lib-header-920x430.jpg
+        type: string
+      library_hero_image:
+        description: Library Hero URL. Recommended 3840×1240 px.
+        example: https://cdn.example.com/lib-hero-3840x1240.jpg
+        type: string
+      library_logo_image:
+        description: Library Logo URL. Transparent PNG, max width 1280 px.
+        example: https://cdn.example.com/lib-logo.png
+        type: string
+      main_capsule_image:
+        description: Main Capsule URL. Recommended 1232×706 px. Store homepage carousel.
+        example: https://cdn.example.com/main-1232x706.jpg
+        type: string
+      metacritic_score:
+        example: 83
+        type: integer
+      metacritic_url:
+        type: string
+      original_price_cents:
+        example: 2999
+        type: integer
+      platform_linux:
+        example: false
+        type: boolean
+      platform_mac:
+        example: false
+        type: boolean
+      platform_windows:
+        example: true
+        type: boolean
+      recommendations_total:
+        example: 100000
+        type: integer
+      release_date:
+        type: string
+      required_age:
+        example: 0
+        type: integer
+      support_email:
+        type: string
+      support_url:
+        type: string
+      supported_languages:
+        items:
+          $ref: '#/definitions/GameSupportedLanguageInput'
+        type: array
+      tag_ids:
+        items:
+          type: integer
+        type: array
+      translations:
+        items:
+          $ref: '#/definitions/GameTranslationInput'
+        minItems: 1
+        type: array
+      vertical_capsule_image:
+        description: Vertical Capsule URL. Recommended 748×896 px.
+        example: https://cdn.example.com/vertical-748x896.jpg
+        type: string
+      website:
+        example: https://example.com
+        type: string
+    required:
+    - translations
+    type: object
+  CreateOrderRequest:
+    properties:
+      game_id:
+        type: integer
+    required:
+    - game_id
+    type: object
+  CreatePostRequest:
+    properties:
+      access_type:
+        type: string
+      content:
+        type: string
+      post_type:
+        type: string
+      price:
+        type: integer
+      teaser_limit:
+        type: integer
+      title:
+        type: string
+    required:
+    - access_type
+    - post_type
+    - title
+    type: object
+  CreatePromoReq:
+    properties:
+      description:
+        type: string
+      end_time:
+        type: string
+      start_time:
+        type: string
+      title:
+        type: string
+    required:
+    - end_time
+    - start_time
+    - title
+    type: object
+  CreateTagReq:
+    properties:
+      code:
+        type: string
+      tag_type:
+        enum:
+        - genre
+        - category
+        - custom
+        type: string
+      translations:
+        items:
+          $ref: '#/definitions/TagTranslationInput'
+        minItems: 1
+        type: array
+    required:
+    - code
+    - tag_type
+    - translations
+    type: object
+  CreateWithdrawalReq:
+    properties:
+      amount:
+        type: number
+      bank_account_info:
+        type: string
+    required:
+    - amount
+    - bank_account_info
+    type: object
+  CustomDomainInfo:
+    properties:
+      default:
+        type: boolean
+      domain:
+        type: string
+      scopes:
+        items:
+          type: string
+        type: array
+    type: object
+  DevUpdateProfileRequest:
+    properties:
+      bank_account_info:
+        type: string
+      company_name:
+        type: string
+      contact_email:
+        type: string
+      tax_info:
+        type: string
+    required:
+    - company_name
+    - contact_email
+    type: object
+  DeveloperProfile:
+    properties:
+      bank_account_info:
+        type: string
+      company_name:
+        type: string
+      contact_email:
+        type: string
+      created_at:
+        type: string
+      tax_info:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+      verification_status:
+        $ref: '#/definitions/DeveloperVerificationStatus'
+    type: object
+  DeveloperVerificationStatus:
+    enum:
+    - pending
+    - approved
+    - rejected
+    type: string
+    x-enum-varnames:
+    - VerificationStatusPending
+    - VerificationStatusApproved
+    - VerificationStatusRejected
+  DiscountType:
+    enum:
+    - percentage
+    - fixed_amount
+    type: string
+    x-enum-varnames:
+    - DiscountTypePercentage
+    - DiscountTypeFixedAmount
+  Game:
+    properties:
+      achievements_total:
+        type: integer
+      app_icon_image:
+        description: App icon URL. Recommended 184×184 PNG.
+        type: string
+      assets:
+        items:
+          $ref: '#/definitions/GameAsset'
+        type: array
+      background_image:
+        description: Store page background. Recommended 1438×810 PNG/JPG.
+        type: string
+      background_raw_image:
+        description: Raw background before template overlay.
+        type: string
+      base_price_cents:
+        type: integer
+      capsule_image:
+        description: Small Capsule URL. Recommended 462×174 PNG/JPG.
+        type: string
+      capsule_image_v5:
+        description: Compact capsule derivative (~184×69 display).
+        type: string
+      coming_soon:
+        type: boolean
+      companies:
+        items:
+          $ref: '#/definitions/GameCompany'
+        type: array
+      controller_support:
+        $ref: '#/definitions/ControllerSupport'
+      created_at:
+        type: string
+      currency:
+        type: string
+      developer_id:
+        type: string
+      early_access:
+        description: Early Access release option.
+        type: boolean
+      external_app_id:
+        type: string
+      external_source:
+        type: string
+      header_image:
+        description: Header Capsule URL. Recommended 920×430 PNG/JPG.
+        type: string
+      icon_image:
+        description: Game icon URL. Recommended 256×256 PNG/ICO.
+        type: string
+      id:
+        type: integer
+      is_free:
+        type: boolean
+      library_capsule_image:
+        description: Library Capsule URL. Recommended 600×900 PNG/JPG. Library grid
+          cover.
+        type: string
+      library_header_image:
+        description: Library Header URL. Recommended 920×430 PNG/JPG. Library list
+          header.
+        type: string
+      library_hero_image:
+        description: Library Hero URL. Recommended 3840×1240 PNG/JPG. Library detail
+          hero.
+        type: string
+      library_logo_image:
+        description: Library Logo URL. Transparent PNG, max width 1280 px.
+        type: string
+      main_capsule_image:
+        description: Main Capsule URL. Recommended 1232×706 PNG/JPG. Store homepage
+          carousel.
+        type: string
+      metacritic_score:
+        type: integer
+      metacritic_url:
+        type: string
+      original_price_cents:
+        type: integer
+      platform_linux:
+        type: boolean
+      platform_mac:
+        type: boolean
+      platform_windows:
+        type: boolean
+      recommendations_total:
+        type: integer
+      release_date:
+        type: string
+      required_age:
+        type: integer
+      status:
+        $ref: '#/definitions/GameStatus'
+      support_email:
+        type: string
+      support_url:
+        type: string
+      supported_languages:
+        items:
+          $ref: '#/definitions/GameSupportedLanguage'
+        type: array
+      tags:
+        items:
+          $ref: '#/definitions/Tag'
+        type: array
+      translations:
+        items:
+          $ref: '#/definitions/GameTranslation'
+        type: array
+      updated_at:
+        type: string
+      vertical_capsule_image:
+        description: Vertical Capsule URL. Recommended 748×896 PNG/JPG. Promo vertical
+          slots.
+        type: string
+      website:
+        type: string
+    type: object
+  GameAsset:
+    properties:
+      asset_type:
+        $ref: '#/definitions/GameAssetType'
+      created_at:
+        type: string
+      external_id:
+        type: string
+      game_id:
+        type: integer
+      id:
+        type: integer
+      is_highlight:
+        type: boolean
+      metadata:
+        type: string
+      role:
+        allOf:
+        - $ref: '#/definitions/GameAssetRole'
+        description: 'screenshot: 1920×1080 min; trailer: 1920×1080 H.264+AAC.'
+      sort_order:
+        type: integer
+      status:
+        $ref: '#/definitions/GameStatus'
+      thumbnail_url:
+        description: ~600×338 for screenshots; 1920×1080 poster for trailers.
+        type: string
+      translations:
+        items:
+          $ref: '#/definitions/GameAssetTranslation'
+        type: array
+      updated_at:
+        type: string
+      url:
+        description: Full image or video playback URL.
+        type: string
+    type: object
+  GameAssetDTO:
+    properties:
+      asset_type:
+        allOf:
+        - $ref: '#/definitions/GameAssetType'
+        description: '`image`/`video` for storefront; `build` for install package.'
+        enum:
+        - image
+        - video
+        - build
+      external_id:
+        example: "0"
+        type: string
+      id:
+        example: 1
+        type: integer
+      is_highlight:
+        description: Featured trailer.
+        example: false
+        type: boolean
+      metadata:
+        description: Trailer stream URLs (HLS/DASH).
+        example: '{"hls_h264":"https://cdn.example.com/master.m3u8"}'
+        type: string
+      role:
+        allOf:
+        - $ref: '#/definitions/GameAssetRole'
+        description: 'screenshot: 1920×1080 min; trailer: 1920×1080 H.264 video.'
+        enum:
+        - header
+        - capsule
+        - screenshot
+        - trailer
+        - background
+        - build
+      sort_order:
+        example: 0
+        type: integer
+      status:
+        allOf:
+        - $ref: '#/definitions/GameStatus'
+        enum:
+        - draft
+        - review
+        - published
+        - rejected
+        - delisted
+      thumbnail_url:
+        description: ~600×338 for screenshots; 1920×1080 poster for trailers.
+        example: https://cdn.example.com/ss-600x338.jpg
+        type: string
+      title:
+        description: Locale-resolved trailer title.
+        example: Launch Trailer
+        type: string
+      url:
+        description: Full image or video URL (MP4/HLS).
+        example: https://cdn.example.com/ss-1920x1080.jpg
+        type: string
+    type: object
+  GameAssetRole:
+    enum:
+    - header
+    - capsule
+    - screenshot
+    - trailer
+    - background
+    - build
+    type: string
+    x-enum-varnames:
+    - AssetRoleHeader
+    - AssetRoleCapsule
+    - AssetRoleScreenshot
+    - AssetRoleTrailer
+    - AssetRoleBackground
+    - AssetRoleBuild
+  GameAssetTranslation:
+    properties:
+      asset_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      locale:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  GameAssetTranslationInput:
+    properties:
+      locale:
+        type: string
+      title:
+        type: string
+    required:
+    - locale
+    type: object
+  GameAssetType:
+    enum:
+    - image
+    - video
+    - build
+    type: string
+    x-enum-varnames:
+    - AssetTypeImage
+    - AssetTypeVideo
+    - AssetTypeBuild
+  GameCompany:
+    properties:
+      company_role:
+        $ref: '#/definitions/GameCompanyRole'
+      created_at:
+        type: string
+      game_id:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      sort_order:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  GameCompanyInput:
+    properties:
+      company_role:
+        $ref: '#/definitions/GameCompanyRole'
+      name:
+        type: string
+      sort_order:
+        type: integer
+    required:
+    - company_role
+    - name
+    type: object
+  GameCompanyRole:
+    enum:
+    - developer
+    - publisher
+    type: string
+    x-enum-varnames:
+    - CompanyRoleDeveloper
+    - CompanyRolePublisher
+  GameDetailDTO:
+    properties:
+      about_description:
+        type: string
+      achievements_total:
+        type: integer
+      app_icon_image:
+        description: App icon (184×184).
+        example: https://cdn.example.com/app-icon-184.png
+        type: string
+      assets:
+        items:
+          $ref: '#/definitions/GameAssetDTO'
+        type: array
+      background_image:
+        description: Store page background (1438×810).
+        example: https://cdn.example.com/bg-1438x810.jpg
+        type: string
+      background_raw_image:
+        description: Raw background before template.
+        type: string
+      base_price_cents:
+        type: integer
+      capsule_image:
+        description: Small Capsule (462×174 source).
+        example: https://cdn.example.com/capsule-462x174.jpg
+        type: string
+      capsule_image_v5:
+        description: Compact capsule derivative.
+        example: https://cdn.example.com/capsule-184x69.jpg
+        type: string
+      coming_soon:
+        type: boolean
+      controller_support:
+        $ref: '#/definitions/ControllerSupport'
+      currency:
+        type: string
+      detailed_description:
+        type: string
+      developer_id:
+        type: string
+      developers:
+        items:
+          type: string
+        type: array
+      early_access:
+        type: boolean
+      external_app_id:
+        type: string
+      external_source:
+        type: string
+      header_image:
+        description: Header Capsule display URL (source 920×430).
+        example: https://cdn.example.com/header-920x430.jpg
+        type: string
+      icon_image:
+        description: Game icon (256×256).
+        example: https://cdn.example.com/icon-256.png
+        type: string
+      id:
+        type: integer
+      is_free:
+        type: boolean
+      library_capsule_image:
+        description: Library Capsule (600×900).
+        example: https://cdn.example.com/lib-cap-600x900.jpg
+        type: string
+      library_header_image:
+        description: Library Header (920×430).
+        example: https://cdn.example.com/lib-header-920x430.jpg
+        type: string
+      library_hero_image:
+        description: Library Hero (3840×1240).
+        example: https://cdn.example.com/lib-hero-3840x1240.jpg
+        type: string
+      library_logo_image:
+        description: Library Logo (transparent PNG).
+        example: https://cdn.example.com/lib-logo.png
+        type: string
+      linux_requirements_min:
+        type: string
+      linux_requirements_rec:
+        type: string
+      locale:
+        type: string
+      mac_requirements_min:
+        type: string
+      mac_requirements_rec:
+        type: string
+      main_capsule_image:
+        description: Main Capsule (1232×706). Homepage carousel.
+        example: https://cdn.example.com/main-1232x706.jpg
+        type: string
+      metacritic_score:
+        type: integer
+      metacritic_url:
+        type: string
+      original_price_cents:
+        type: integer
+      original_price_formatted:
+        type: string
+      pc_requirements_min:
+        type: string
+      pc_requirements_rec:
+        type: string
+      platform_linux:
+        type: boolean
+      platform_mac:
+        type: boolean
+      platform_windows:
+        type: boolean
+      price_formatted:
+        type: string
+      publishers:
+        items:
+          type: string
+        type: array
+      recommendations_total:
+        type: integer
+      release_date:
+        type: string
+      required_age:
+        type: integer
+      short_description:
+        type: string
+      status:
+        $ref: '#/definitions/GameStatus'
+      support_email:
+        type: string
+      support_url:
+        type: string
+      supported_languages:
+        items:
+          $ref: '#/definitions/GameSupportedLanguageDTO'
+        type: array
+      tags:
+        items:
+          $ref: '#/definitions/GameTagDTO'
+        type: array
+      title:
+        type: string
+      vertical_capsule_image:
+        description: Vertical Capsule (748×896).
+        example: https://cdn.example.com/vertical-748x896.jpg
+        type: string
+      website:
+        type: string
+    type: object
+  GameListItemDTO:
+    properties:
+      base_price_cents:
+        type: integer
+      coming_soon:
+        type: boolean
+      currency:
+        type: string
+      early_access:
+        type: boolean
+      header_image:
+        description: Header Capsule display URL (source 920×430).
+        example: https://cdn.example.com/header-920x430.jpg
+        type: string
+      id:
+        type: integer
+      is_free:
+        type: boolean
+      locale:
+        type: string
+      main_capsule_image:
+        description: Main Capsule (1232×706). Homepage carousel.
+        example: https://cdn.example.com/main-1232x706.jpg
+        type: string
+      original_price_cents:
+        type: integer
+      original_price_formatted:
+        type: string
+      platform_linux:
+        type: boolean
+      platform_mac:
+        type: boolean
+      platform_windows:
+        type: boolean
+      price_formatted:
+        type: string
+      release_date:
+        type: string
+      short_description:
+        type: string
+      status:
+        $ref: '#/definitions/GameStatus'
+      tags:
+        items:
+          $ref: '#/definitions/GameTagDTO'
+        type: array
+      title:
+        type: string
+    type: object
+  GamePromotion:
+    properties:
+      active_price:
+        type: number
+      created_at:
+        type: string
+      discount_type:
+        $ref: '#/definitions/DiscountType'
+      discount_value:
+        type: number
+      game_id:
+        type: integer
+      id:
+        type: integer
+      promotion_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  GameStatus:
+    enum:
+    - draft
+    - review
+    - published
+    - rejected
+    - delisted
+    type: string
+    x-enum-varnames:
+    - GameStatusDraft
+    - GameStatusReview
+    - GameStatusPublished
+    - GameStatusRejected
+    - GameStatusDelisted
+  GameSupportedLanguage:
+    properties:
+      created_at:
+        type: string
+      game_id:
+        type: integer
+      has_full_audio:
+        type: boolean
+      id:
+        type: integer
+      language_code:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  GameSupportedLanguageDTO:
+    properties:
+      has_full_audio:
+        type: boolean
+      language_code:
+        type: string
+    type: object
+  GameSupportedLanguageInput:
+    properties:
+      has_full_audio:
+        type: boolean
+      language_code:
+        type: string
+    required:
+    - language_code
+    type: object
+  GameTagDTO:
+    properties:
+      code:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      tag_type:
+        type: string
+    type: object
+  GameTranslation:
+    properties:
+      about_description:
+        type: string
+      created_at:
+        type: string
+      detailed_description:
+        type: string
+      game_id:
+        type: integer
+      id:
+        type: integer
+      linux_requirements_min:
+        type: string
+      linux_requirements_rec:
+        type: string
+      locale:
+        type: string
+      mac_requirements_min:
+        type: string
+      mac_requirements_rec:
+        type: string
+      pc_requirements_min:
+        type: string
+      pc_requirements_rec:
+        type: string
+      short_description:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  GameTranslationInput:
+    properties:
+      about_description:
+        type: string
+      detailed_description:
+        type: string
+      linux_requirements_min:
+        type: string
+      linux_requirements_rec:
+        type: string
+      locale:
+        type: string
+      mac_requirements_min:
+        type: string
+      mac_requirements_rec:
+        type: string
+      pc_requirements_min:
+        type: string
+      pc_requirements_rec:
+        type: string
+      short_description:
+        type: string
+      title:
+        type: string
+    required:
+    - locale
+    - title
+    type: object
+  HomepageBannerDTO:
+    properties:
+      bg_color:
+        type: string
+      cta:
+        type: string
+      href:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      subtitle:
+        type: string
+      title:
+        type: string
+    type: object
+  HomepageBudgetDealsDTO:
+    properties:
+      under_5:
+        $ref: '#/definitions/HomepageSectionDTO'
+      under_10:
+        $ref: '#/definitions/HomepageSectionDTO'
+    type: object
+  HomepageCategoryDTO:
+    properties:
+      icon:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      slug:
+        type: string
+    type: object
+  HomepageGameCardDTO:
+    properties:
+      badge:
+        type: string
+      base_price_cents:
+        type: integer
+      capsule_image:
+        type: string
+      currency:
+        type: string
+      discount_percent:
+        type: integer
+      header_image:
+        type: string
+      id:
+        type: integer
+      is_free:
+        type: boolean
+      library_capsule_image:
+        description: Library Capsule (600×900). Client vertical card cover.
+        type: string
+      original_price_cents:
+        type: integer
+      original_price_formatted:
+        type: string
+      platform_linux:
+        type: boolean
+      platform_mac:
+        type: boolean
+      platform_windows:
+        type: boolean
+      price_formatted:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    type: object
+  HomepageGenreSectionsDTO:
+    properties:
+      action:
+        $ref: '#/definitions/HomepageSectionDTO'
+      horror:
+        $ref: '#/definitions/HomepageSectionDTO'
+      indie:
+        $ref: '#/definitions/HomepageSectionDTO'
+      rpg:
+        $ref: '#/definitions/HomepageSectionDTO'
+      sports:
+        $ref: '#/definitions/HomepageSectionDTO'
+    type: object
+  HomepageMetaDTO:
+    properties:
+      cache_ttl_seconds:
+        type: integer
+      generated_at:
+        type: string
+      locale:
+        type: string
+    type: object
+  HomepageResponseDTO:
+    properties:
+      banners:
+        items:
+          $ref: '#/definitions/HomepageBannerDTO'
+        type: array
+      category_quick_links:
+        items:
+          $ref: '#/definitions/HomepageCategoryDTO'
+        type: array
+      meta:
+        $ref: '#/definitions/HomepageMetaDTO'
+      sections:
+        $ref: '#/definitions/HomepageSectionsDTO'
+    type: object
+  HomepageSectionDTO:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/HomepageGameCardDTO'
+        type: array
+      total:
+        type: integer
+    type: object
+  HomepageSectionsDTO:
+    properties:
+      bestsellers:
+        $ref: '#/definitions/HomepageSectionDTO'
+      budget_deals:
+        $ref: '#/definitions/HomepageBudgetDealsDTO'
+      genres:
+        $ref: '#/definitions/HomepageGenreSectionsDTO'
+      random_keys:
+        $ref: '#/definitions/HomepageSectionDTO'
+      weekly_trends:
+        $ref: '#/definitions/HomepageSectionDTO'
+    type: object
+  JSONResult:
+    properties:
+      data:
+        description: 返回的内嵌数据结构，可能为 nil
+      error_no:
+        description: 错误码，0表示成功
+        example: 0
+        type: integer
+      msg:
+        description: 错误信息，成功时为 "success"
+        example: success
+        type: string
+      request_id:
+        description: 请求的唯一标识符
+        example: fab32c7b-fda9-409b-b346-82d81d3f85a1
+        type: string
+    type: object
+  ListGameResp:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/GameListItemDTO'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  ListPostResp:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/Post'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  ListPromoResp:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/Promotion'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  ListResp:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/User'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  ListResult:
+    properties:
+      items: {}
+      total:
+        type: integer
+    type: object
+  ListTagResp:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/TagListItemDTO'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  ListTxResp:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/Transaction'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  ListWalletResp:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/Wallet'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  Media:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      hlsURL:
+        description: 视频切片加密流播放地址
+        type: string
+      id:
+        type: integer
+      mediaType:
+        description: '媒体格式: image, video, pdf, zip'
+        type: string
+      objectKey:
+        description: 云存储源文件的 Object Key (用于生成 Presigned URL)
+        type: string
+      postID:
+        description: 所属帖子ID
+        type: integer
+      sortOrder:
+        description: 排序序号 (结合 Post.TeaserLimit 控制免费试看)
+        type: integer
+      storage_object:
+        $ref: '#/definitions/StorageObject'
+      storageObjectID:
+        description: 关联 storage_objects
+        type: integer
+      updatedAt:
+        type: string
+      watermarkStatus:
+        description: '水印处理状态: none, processing, done'
+        type: string
+    type: object
+  OffsetReq:
+    properties:
+      reason:
+        type: string
+    required:
+    - reason
+    type: object
+  Order:
+    properties:
+      created_at:
+        type: string
+      game_id:
+        type: integer
+      id:
+        type: integer
+      original_price:
+        type: number
+      paid_amount:
+        type: number
+      payment_method:
+        $ref: '#/definitions/PaymentMethod'
+      player_id:
+        type: string
+      status:
+        $ref: '#/definitions/OrderStatus'
+      updated_at:
+        type: string
+    type: object
+  OrderStatus:
+    enum:
+    - pending
+    - paid
+    - refunded
+    type: string
+    x-enum-varnames:
+    - OrderStatusPending
+    - OrderStatusPaid
+    - OrderStatusRefunded
+  PaymentMethod:
+    enum:
+    - wallet
+    - stripe
+    - abpay
+    type: string
+    x-enum-varnames:
+    - PaymentMethodWallet
+    - PaymentMethodStripe
+    - PaymentMethodABPay
+  PlayerLibrary:
+    properties:
+      acquire_method:
+        $ref: '#/definitions/AcquireMethod'
+      created_at:
+        type: string
+      game_id:
+        type: integer
+      id:
+        type: integer
+      play_time_minutes:
+        type: integer
+      player_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  PlayerProfile:
+    properties:
+      avatar_url:
+        type: string
+      bio:
+        type: string
+      created_at:
+        type: string
+      nickname:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  Post:
+    properties:
+      accessType:
+        description: '访问控制: free, sub_only, ppv'
+        type: string
+      content:
+        description: 富文本内容
+        type: string
+      createdAt:
+        type: string
+      creatorID:
+        description: 创作者ID (关联 User)
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      media:
+        description: 关联关系
+        items:
+          $ref: '#/definitions/Media'
+        type: array
+      postType:
+        description: '内容类型: image_set, video, comic, novel 等'
+        type: string
+      price:
+        description: '单点付费金额 (单位: 分)'
+        type: integer
+      status:
+        allOf:
+        - $ref: '#/definitions/PostStatus'
+        description: '状态: draft, review, published, rejected, deleted'
+      tags:
+        description: 关联的标签
+        items:
+          $ref: '#/definitions/Tag'
+        type: array
+      teaserLimit:
+        description: 部分可见限制 (如前N张图，或前N秒视频)
+        type: integer
+      title:
+        description: 标题
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  PostStatus:
+    enum:
+    - draft
+    - review
+    - published
+    - rejected
+    - deleted
+    type: string
+    x-enum-varnames:
+    - PostStatusDraft
+    - PostStatusReview
+    - PostStatusPublished
+    - PostStatusRejected
+    - PostStatusDeleted
+  PresignGetResult:
+    properties:
+      access_url:
+        type: string
+      expires_at:
+        type: string
+      url_type:
+        type: string
+    type: object
+  PresignPutResult:
+    properties:
+      expires_at:
+        type: string
+      headers:
+        additionalProperties:
+          type: string
+        type: object
+      method:
+        type: string
+      object_key:
+        type: string
+      storage_object_id:
+        type: integer
+      url:
+        type: string
+    type: object
+  Promotion:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      end_time:
+        type: string
+      game_promotions:
+        items:
+          $ref: '#/definitions/GamePromotion'
+        type: array
+      id:
+        type: integer
+      start_time:
+        type: string
+      status:
+        $ref: '#/definitions/PromotionStatus'
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  PromotionStatus:
+    enum:
+    - upcoming
+    - active
+    - ended
+    type: string
+    x-enum-varnames:
+    - PromotionStatusUpcoming
+    - PromotionStatusActive
+    - PromotionStatusEnded
+  RechargeRecord:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      external_tx_id:
+        type: string
+      id:
+        type: integer
+      payment_provider:
+        $ref: '#/definitions/PaymentMethod'
+      player_id:
+        type: string
+      status:
+        $ref: '#/definitions/RechargeStatus'
+      updated_at:
+        type: string
+    type: object
+  RechargeRequest:
+    properties:
+      amount:
+        type: number
+      payment_provider:
+        $ref: '#/definitions/PaymentMethod'
+    required:
+    - amount
+    - payment_provider
+    type: object
+  RechargeStatus:
+    enum:
+    - pending
+    - success
+    - failed
+    type: string
+    x-enum-varnames:
+    - RechargeStatusPending
+    - RechargeStatusSuccess
+    - RechargeStatusFailed
+  StorageObject:
+    properties:
+      bucket:
+        type: string
+      cdn_domain:
+        type: string
+      content_type:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      etag:
+        type: string
+      filename:
+        type: string
+      id:
+        type: integer
+      object_key:
+        type: string
+      owner_id:
+        type: string
+      provider:
+        type: string
+      public_url:
+        type: string
+      scope:
+        type: string
+      size_bytes:
+        type: integer
+      status:
+        $ref: '#/definitions/StorageObjectStatus'
+      updatedAt:
+        type: string
+    type: object
+  StorageObjectStatus:
+    enum:
+    - pending
+    - uploaded
+    - deleted
+    type: string
+    x-enum-varnames:
+    - StorageObjectStatusPending
+    - StorageObjectStatusUploaded
+    - StorageObjectStatusDeleted
+  Tag:
+    properties:
+      code:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      tag_type:
+        type: string
+      translations:
+        items:
+          $ref: '#/definitions/TagTranslation'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  TagDetailDTO:
+    properties:
+      code:
+        type: string
+      id:
+        type: integer
+      locale:
+        type: string
+      name:
+        type: string
+      tag_type:
+        type: string
+      translations:
+        items:
+          $ref: '#/definitions/TagTranslationDTO'
+        type: array
+    type: object
+  TagListItemDTO:
+    properties:
+      code:
+        type: string
+      id:
+        type: integer
+      locale:
+        type: string
+      name:
+        type: string
+      tag_type:
+        type: string
+    type: object
+  TagTranslation:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      locale:
+        type: string
+      name:
+        type: string
+      tag_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  TagTranslationDTO:
+    properties:
+      id:
+        type: integer
+      locale:
+        type: string
+      name:
+        type: string
+    type: object
+  TagTranslationInput:
+    properties:
+      locale:
+        type: string
+      name:
+        type: string
+    required:
+    - locale
+    - name
+    type: object
+  TargetType:
+    enum:
+    - game
+    - game_asset
+    - post
+    type: string
+    x-enum-varnames:
+    - TargetTypeGame
+    - TargetTypeGameAsset
+    - TargetTypePost
+  Transaction:
+    properties:
+      amount:
+        description: Can be negative
+        type: number
+      created_at:
+        type: string
+      id:
+        type: integer
+      reference_id:
+        description: E.g., Order ID, Recharge ID
+        type: string
+      transaction_type:
+        $ref: '#/definitions/TransactionType'
+      wallet_id:
+        type: integer
+    type: object
+  TransactionType:
+    enum:
+    - recharge
+    - purchase
+    - game_revenue
+    - platform_cut
+    - withdrawal
+    - offset
+    type: string
+    x-enum-varnames:
+    - TxTypeRecharge
+    - TxTypePurchase
+    - TxTypeGameRevenue
+    - TxTypePlatformCut
+    - TxTypeWithdrawal
+    - TxTypeOffset
+  UpdateAssetRequest:
+    properties:
+      external_id:
+        type: string
+      is_highlight:
+        type: boolean
+      metadata:
+        type: string
+      role:
+        $ref: '#/definitions/GameAssetRole'
+      sort_order:
+        type: integer
+      thumbnail_url:
+        type: string
+      translations:
+        items:
+          $ref: '#/definitions/GameAssetTranslationInput'
+        type: array
+      url:
+        type: string
+    type: object
+  UpdateGameRequest:
+    properties:
+      achievements_total:
+        example: 50
+        type: integer
+      app_icon_image:
+        description: App icon URL. Recommended 184×184 px.
+        example: https://cdn.example.com/app-icon-184.png
+        type: string
+      background_image:
+        description: Page background (processed). Recommended 1438×810 px, subtle
+          artwork.
+        example: https://cdn.example.com/bg-1438x810.jpg
+        type: string
+      background_raw_image:
+        description: Raw background before template overlay. Recommended 1438×810
+          px.
+        example: https://cdn.example.com/bg-raw.jpg
+        type: string
+      base_price_cents:
+        example: 1999
+        type: integer
+      capsule_image:
+        description: Small Capsule URL. Recommended 462×174 px, PNG/JPG. Search &
+          list views.
+        example: https://cdn.example.com/capsule-462x174.jpg
+        type: string
+      capsule_image_v5:
+        description: Compact capsule derivative (e.g. Steam 184×69 display). Source
+          should still be 462×174.
+        example: https://cdn.example.com/capsule-184x69.jpg
+        type: string
+      coming_soon:
+        example: false
+        type: boolean
+      companies:
+        items:
+          $ref: '#/definitions/GameCompanyInput'
+        type: array
+      controller_support:
+        allOf:
+        - $ref: '#/definitions/ControllerSupport'
+        enum:
+        - none
+        - partial
+        - full
+      currency:
+        example: USD
+        type: string
+      early_access:
+        example: false
+        type: boolean
+      external_app_id:
+        example: "105600"
+        type: string
+      external_source:
+        enum:
+        - steam
+        - native
+        example: steam
+        type: string
+      header_image:
+        description: Header Capsule URL. Recommended 920×430 px, PNG/JPG. Store page
+          hero & recommendations.
+        example: https://cdn.example.com/header-920x430.jpg
+        type: string
+      icon_image:
+        description: Game icon URL. Recommended 256×256 px.
+        example: https://cdn.example.com/icon-256.png
+        type: string
+      is_free:
+        example: false
+        type: boolean
+      library_capsule_image:
+        description: Library Capsule URL. Recommended 600×900 px.
+        example: https://cdn.example.com/lib-cap-600x900.jpg
+        type: string
+      library_header_image:
+        description: Library Header URL. Recommended 920×430 px.
+        example: https://cdn.example.com/lib-header-920x430.jpg
+        type: string
+      library_hero_image:
+        description: Library Hero URL. Recommended 3840×1240 px.
+        example: https://cdn.example.com/lib-hero-3840x1240.jpg
+        type: string
+      library_logo_image:
+        description: Library Logo URL. Transparent PNG, max width 1280 px.
+        example: https://cdn.example.com/lib-logo.png
+        type: string
+      main_capsule_image:
+        description: Main Capsule URL. Recommended 1232×706 px. Store homepage carousel.
+        example: https://cdn.example.com/main-1232x706.jpg
+        type: string
+      metacritic_score:
+        example: 83
+        type: integer
+      metacritic_url:
+        type: string
+      original_price_cents:
+        example: 2999
+        type: integer
+      platform_linux:
+        example: false
+        type: boolean
+      platform_mac:
+        example: false
+        type: boolean
+      platform_windows:
+        example: true
+        type: boolean
+      recommendations_total:
+        example: 100000
+        type: integer
+      release_date:
+        type: string
+      required_age:
+        example: 0
+        type: integer
+      support_email:
+        type: string
+      support_url:
+        type: string
+      supported_languages:
+        items:
+          $ref: '#/definitions/GameSupportedLanguageInput'
+        type: array
+      tag_ids:
+        items:
+          type: integer
+        type: array
+      translations:
+        items:
+          $ref: '#/definitions/GameTranslationInput'
+        minItems: 1
+        type: array
+      vertical_capsule_image:
+        description: Vertical Capsule URL. Recommended 748×896 px.
+        example: https://cdn.example.com/vertical-748x896.jpg
+        type: string
+      website:
+        example: https://example.com
+        type: string
+    required:
+    - translations
+    type: object
+  UpdatePlayTimeRequest:
+    properties:
+      minutes:
+        minimum: 1
+        type: integer
+    required:
+    - minutes
+    type: object
+  UpdatePostRequest:
+    properties:
+      access_type:
+        type: string
+      content:
+        type: string
+      post_type:
+        type: string
+      price:
+        type: integer
+      teaser_limit:
+        type: integer
+      title:
+        type: string
+    type: object
+  UpdatePromoReq:
+    properties:
+      description:
+        type: string
+      end_time:
+        type: string
+      start_time:
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/PromotionStatus'
+        enum:
+        - upcoming
+        - active
+        - ended
+      title:
+        type: string
+    type: object
+  UpdateReq:
+    properties:
+      avatar:
+        type: string
+      name:
+        type: string
+    type: object
+  UpdateRoleReq:
+    properties:
+      role:
+        allOf:
+        - $ref: '#/definitions/UserRole'
+        enum:
+        - admin
+        - player
+    required:
+    - role
+    type: object
+  UpdateRoleResp:
+    properties:
+      id:
+        type: string
+      require_session_refresh:
+        type: boolean
+      role:
+        $ref: '#/definitions/UserRole'
+    type: object
+  UpdateStatusReq:
+    properties:
+      status:
+        allOf:
+        - $ref: '#/definitions/UserStatus'
+        enum:
+        - active
+        - inactive
+        - banned
+    required:
+    - status
+    type: object
+  UpdateTagReq:
+    properties:
+      code:
+        type: string
+      tag_type:
+        enum:
+        - genre
+        - category
+        - custom
+        type: string
+      translations:
+        items:
+          $ref: '#/definitions/TagTranslationInput'
+        minItems: 1
+        type: array
+    required:
+    - code
+    - tag_type
+    - translations
+    type: object
+  User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        description: Supabase auth.users ID
+        type: string
+      player_profile:
+        $ref: '#/definitions/PlayerProfile'
+      role:
+        $ref: '#/definitions/UserRole'
+      status:
+        $ref: '#/definitions/UserStatus'
+      updated_at:
+        type: string
+    type: object
+  UserRole:
+    enum:
+    - admin
+    - developer
+    - player
+    type: string
+    x-enum-varnames:
+    - RoleAdmin
+    - RoleDeveloper
+    - RolePlayer
+  UserStatus:
+    enum:
+    - active
+    - inactive
+    - banned
+    type: string
+    x-enum-varnames:
+    - UserStatusActive
+    - UserStatusInactive
+    - UserStatusBanned
+  Wallet:
+    properties:
+      balance:
+        type: number
+      created_at:
+        type: string
+      currency:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  WithdrawalRequest:
+    properties:
+      admin_id:
+        description: ID of the admin who processed it
+        type: string
+      amount:
+        type: number
+      bank_account_info:
+        type: string
+      created_at:
+        type: string
+      developer_id:
+        type: string
+      id:
+        type: integer
+      processed_at:
+        type: string
+      status:
+        $ref: '#/definitions/WithdrawalStatus'
+      updated_at:
+        type: string
+    type: object
+  WithdrawalStatus:
+    enum:
+    - pending
+    - processing
+    - completed
+    - rejected
+    type: string
+    x-enum-varnames:
+    - WithdrawalStatusPending
+    - WithdrawalStatusProcessing
+    - WithdrawalStatusCompleted
+    - WithdrawalStatusRejected
+  adminDeleteObjectRequest:
+    properties:
+      object_key:
+        type: string
+    required:
+    - object_key
+    type: object
+  adminPresignGetRequest:
+    properties:
+      object_key:
+        type: string
+      scope:
+        type: string
+    required:
+    - object_key
+    type: object
+  adminPresignPutRequest:
+    properties:
+      content_type:
+        type: string
+      filename:
+        type: string
+      owner_id:
+        type: string
+      resource_id:
+        type: string
+      resource_type:
+        type: string
+      scope:
+        type: string
+    required:
+    - content_type
+    - filename
+    - owner_id
+    - resource_type
+    - scope
+    type: object
+  attachMediaRequest:
+    properties:
+      media_type:
+        type: string
+      sort_order:
+        type: integer
+      storage_object_id:
+        type: integer
+    required:
+    - media_type
+    - storage_object_id
+    type: object
+  confirmUploadRequest:
+    properties:
+      storage_object_id:
+        type: integer
+    required:
+    - storage_object_id
+    type: object
+  deleteObjectRequest:
+    properties:
+      object_key:
+        type: string
+    required:
+    - object_key
+    type: object
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+  presignGetRequest:
+    properties:
+      object_key:
+        type: string
+      scope:
+        type: string
+    required:
+    - object_key
+    type: object
+  presignPutRequest:
+    properties:
+      content_type:
+        type: string
+      filename:
+        type: string
+      resource_id:
+        type: string
+      resource_type:
+        type: string
+      scope:
+        type: string
+    required:
+    - content_type
+    - filename
+    - resource_type
+    - scope
+    type: object
+info:
+  contact: {}
+  description: Money Template API Doc
+  title: Money Template
+  version: "1.0"
+paths:
+  /admin/game:
+    get:
+      consumes:
+      - application/json
+      description: 'Dash 视角: 分页查询待审核或所有游戏列表，支持 locale 合并视图。 Client 视角: 用户/创作者无法感知此接口。'
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 通过状态过滤(如 review, published, rejected)
+        in: query
+        name: status
+        type: string
+      - description: BCP-47 locale
+        in: query
+        name: locale
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/ListGameResp'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 获取游戏列表
+      tags:
+      - Admin Game
+  /admin/game/{id}:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 获取指定游戏 locale 合并视图（`GameDetailDTO`），含图片 URL 与 `assets[]` 媒体列表。
+        媒体规格: Header 920×430、Capsule 462×174、Background 1438×810、截图 ≥1920×1080、预告片 1920×1080 H.264。详见 `docs/game-store-model.md`。
+        Client 视角: 无直接影响。
+      parameters:
+      - description: 游戏的ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: BCP-47 locale
+        in: query
+        name: locale
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/GameDetailDTO'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 获取指定游戏详情
+      tags:
+      - Admin Game
+  /admin/game/{id}/audit:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 对游戏进行审批、驳回或要求修改，并填写审核意见，系统会记录到审核日志。
+        Client 视角: 创作者在客户端会看到游戏状态变更，并能查看管理端给出的驳回或修改原因。
+      parameters:
+      - description: 游戏的ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 审核动作与原因
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/AuditReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/GameDetailDTO'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 审核游戏
+      tags:
+      - Admin Game
+  /admin/game/{id}/audit-logs:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 获取某款游戏的完整审核历史流转节点与审核意见。
+        Client 视角: 客户端不可直接访问。
+      parameters:
+      - description: 游戏的ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/AuditLog'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 获取游戏审核日志
+      tags:
+      - Admin Game
+  /admin/gameasset/{id}/audit:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 对单个 GameAsset 进行审批或驳回，并附带审核意见。
+        Client 视角: 创作者在客户端能看到单个资产是否合规及修改建议。
+      parameters:
+      - description: GameAsset的ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 审核动作与原因
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/AuditReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/GameAsset'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 审核游戏资产
+      tags:
+      - Admin Game
+  /admin/post:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 分页查询待审核或所有作品，便于后台管理。
+        Client 视角: 仅由管理后台展示使用。
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 通过状态过滤(如 review, published, rejected)
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/ListPostResp'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 获取帖子/作品列表
+      tags:
+      - Admin Post
+  /admin/post/{id}:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 获取指定作品详细信息，包含相关媒体附件以便审查内容是否违规。
+        Client 视角: 无直接影响。
+      parameters:
+      - description: 作品的ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/Post'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 获取指定作品详情
+      tags:
+      - Admin Post
+  /admin/post/{id}/audit:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 对帖子/作品进行审批、驳回或要求修改，并填写意见，系统记录审核日志。
+        Client 视角: 创作者在客户端会看到帖子状态变更，以及管理端给出的驳回或修改原因。
+      parameters:
+      - description: 作品的ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 审核动作与原因
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/AuditReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/Post'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 审核作品
+      tags:
+      - Admin Post
+  /admin/post/{id}/audit-logs:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 获取某篇作品的完整审核历史节点与意见。
+        Client 视角: 客户端不可直接访问。
+      parameters:
+      - description: 作品的ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/AuditLog'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 获取作品审核日志
+      tags:
+      - Admin Post
+  /admin/promotion:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 查询已有促销活动列表以便管理和跟进。
+        Client 视角: 无感知，仅管理端调用。
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/ListPromoResp'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 获取促销活动列表
+      tags:
+      - Admin Promotion
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 创建全站营销活动，配置时间范围。
+        Client 视角: 在活动未生效前无感知。
+      parameters:
+      - description: 促销活动信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/CreatePromoReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/Promotion'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 创建促销活动
+      tags:
+      - Admin Promotion
+  /admin/promotion/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 彻底删除指定的促销活动及关联配置。
+        Client 视角: 如果是进行中的活动被删除，前台将立即下线该促销。
+      parameters:
+      - description: 活动ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 删除促销活动
+      tags:
+      - Admin Promotion
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 获取单个促销活动及其关联的游戏折扣信息。
+        Client 视角: 无感知。
+      parameters:
+      - description: 活动ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/Promotion'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 获取促销活动详情
+      tags:
+      - Admin Promotion
+    put:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 更新活动的名称、时间及状态。
+        Client 视角: 如果活动在进行中修改，可能会影响展示逻辑。
+      parameters:
+      - description: 活动ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/UpdatePromoReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/Promotion'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 更新促销活动
+      tags:
+      - Admin Promotion
+  /admin/promotion/{id}/game:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 为指定的促销活动强制加入游戏并配置折扣（比例或定额），自动计算折后价。
+        Client 视角: 在活动生效期间，用户端将展示此折后价及促销标签。
+      parameters:
+      - description: 活动ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 添加游戏的折扣配置
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/AddGamePromoReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/GamePromotion'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 为促销活动添加游戏
+      tags:
+      - Admin Promotion
+  /admin/storage/domains:
+    get:
+      description: '[Dash] 查看 R2 Custom Domain 配置。 [Client] 不使用。'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 列出 Custom Domains 配置
+      tags:
+      - Admin Storage
+  /admin/storage/object:
+    delete:
+      consumes:
+      - application/json
+      description: '[Dash] 管理员删除 R2 对象并更新注册表。 [Client] 不使用。'
+      parameters:
+      - description: 对象 key
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/adminDeleteObjectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 管理员删除存储对象
+      tags:
+      - Admin Storage
+    get:
+      description: '[Dash] 管理员查询 storage_objects 注册表。 [Client] 不使用。'
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 按 owner 过滤
+        in: query
+        name: owner_id
+        type: string
+      - description: 按状态过滤
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/ListPostResp'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 分页查询存储对象
+      tags:
+      - Admin Storage
+  /admin/storage/presign-get:
+    post:
+      consumes:
+      - application/json
+      description: '[Dash] 管理员获取任意对象的 Presigned GET URL。 [Client] 不使用。'
+      parameters:
+      - description: 对象 key
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/adminPresignGetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/PresignGetResult'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 管理员申请下载 Presigned URL
+      tags:
+      - Admin Storage
+  /admin/storage/presign-put:
+    post:
+      consumes:
+      - application/json
+      description: '[Dash] 管理员代指定用户预注册对象并获取上传 URL。 [Client] 不使用。'
+      parameters:
+      - description: 上传参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/adminPresignPutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/PresignPutResult'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 管理员申请上传 Presigned URL
+      tags:
+      - Admin Storage
+  /admin/tag:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 分页查询标签，支持按 tag_type、keyword 过滤，并按 locale 合并展示名称。
+        Client 视角: 客户端通过游戏详情 tags 字段消费标签，不直接调用此接口。
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 标签类型(genre/category/custom)
+        in: query
+        name: tag_type
+        type: string
+      - description: 搜索 code 或翻译名称
+        in: query
+        name: keyword
+        type: string
+      - description: BCP-47 locale
+        in: query
+        name: locale
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/ListTagResp'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 获取游戏标签列表
+      tags:
+      - Admin Tag
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 新建标签，code + tag_type 唯一，名称通过 translations 多语言录入。
+        Client 视角: 无感知；新标签可在后续游戏关联后出现在商店页。
+      parameters:
+      - description: 标签信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/CreateTagReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/TagDetailDTO'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 创建游戏标签
+      tags:
+      - Admin Tag
+  /admin/tag/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 删除未被游戏引用的标签；若 game_tags 仍有关联则拒绝删除。
+        Client 视角: 无感知。
+      parameters:
+      - description: Tag ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 删除游戏标签
+      tags:
+      - Admin Tag
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 获取标签详情及全部 translations，供编辑表单使用。
+        Client 视角: 无直接调用；标签名称随游戏详情返回。
+      parameters:
+      - description: Tag ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: BCP-47 locale
+        in: query
+        name: locale
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/TagDetailDTO'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 获取游戏标签详情
+      tags:
+      - Admin Tag
+    put:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 更新标签 code、tag_type 及各 locale 名称。
+        Client 视角: 无感知；已发布游戏详情中的标签名会随翻译更新。
+      parameters:
+      - description: Tag ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 标签信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateTagReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/TagDetailDTO'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 更新游戏标签
+      tags:
+      - Admin Tag
+  /admin/transaction:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 分页查询全局交易流水，排查异常交易或充值记录。
+        Client 视角: 无感知。
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/ListTxResp'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 获取平台全局交易流水
+      tags:
+      - Admin Finance
+  /admin/transaction/{id}/offset:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 在发现异常交易时不能直接删除原记录，而是创建一条反向流水（冲账）以抵消金额，并更新钱包余额。
+        Client 视角: 用户钱包账单会额外显示一条类型为 offset 的冲账流水，余额随之变动。
+      parameters:
+      - description: 原交易的ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 冲账原因
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/OffsetReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/Transaction'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 对异常交易进行冲账
+      tags:
+      - Admin Finance
+  /admin/user:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 分页查询全量用户或按关键词搜索，用于用户管理。
+        Client 视角: 无感知。
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 通过名字或邮箱搜索
+        in: query
+        name: keyword
+        type: string
+      - description: 按角色过滤(admin,developer,player)
+        in: query
+        name: role
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/ListResp'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 获取用户列表
+      tags:
+      - Admin User
+  /admin/user/{uuid}:
+    delete:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 对违规极度严重用户执行删除操作（底层软删除）。
+        Client 视角: 用户无法再使用账号，且数据在前端不可见。
+      parameters:
+      - description: 用户的唯一 UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 软删除用户
+      tags:
+      - Admin User
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 获取单个用户的详细信息资料。
+        Client 视角: 无感知。
+      parameters:
+      - description: 用户的唯一 UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 获取指定用户详情
+      tags:
+      - Admin User
+    put:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 手动更新/纠正用户资料（如重置非法名字、头像）。
+        Client 视角: 用户在客户端会看到自己名字/头像被修改。
+      parameters:
+      - description: 用户的唯一 UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: 需要更新的用户资料
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 修改用户信息
+      tags:
+      - Admin User
+  /admin/user/{uuid}/role:
+    put:
+      consumes:
+      - application/json
+      description: 'Dash 视角: 仅支持 admin 与 player 之间提权/降权，并同步至 Supabase app_metadata.role。
+        [Client] 角色变更后需 refreshSession 后生效。'
+      parameters:
+      - description: 用户的唯一 UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: 需要更新的用户角色
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateRoleReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/UpdateRoleResp'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 用户提权/降权
+      tags:
+      - Admin User
+  /admin/user/{uuid}/status:
+    put:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 对用户进行封禁、解封操作。
+        Client 视角: 用户被封禁后，将无法再登录或执行敏感操作。
+      parameters:
+      - description: 用户的唯一 UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: 需要更新的用户状态
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateStatusReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 修改用户状态
+      tags:
+      - Admin User
+  /admin/wallet:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Dash 视角: 查询全站所有用户的钱包及其当前余额，用于财务监控。
+        Client 视角: 无感知。
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/ListWalletResp'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 获取用户钱包列表
+      tags:
+      - Admin Finance
+  /api/v1/client/game:
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 此接口展示的结果受管理员在后台审核游戏状态（上架/下架）的影响。管理员审核通过（修改状态为 published）后，游戏才会在此接口返回。
+        [Client] 客户端调用以获取处于 `published` 状态的游戏列表，支持 `?locale=` 与分页。'
+      parameters:
+      - description: BCP-47 locale
+        in: query
+        name: locale
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: size
+        type: integer
+      - description: Search query
+        in: query
+        name: query
+        type: string
+      - description: Tag to filter by
+        in: query
+        name: tag
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/ListResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/GameListItemDTO'
+                        type: array
+                    type: object
+              type: object
+      summary: 获取游戏列表 / List games
+      tags:
+      - client-game
+  /api/v1/client/game/{id}:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        [Client] 返回合并后的单 locale 商店详情（`GameDetailDTO`）。
+
+        **媒体字段**: `header_image`（920×430）、`main_capsule_image`（1232×706）、`capsule_image`（462×174）、`vertical_capsule_image`（748×896）、库资产与图标字段；`assets[]` 含截图（1920×1080）与预告片。详见 `docs/game-store-materials.md`。
+      parameters:
+      - description: Game ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: BCP-47 locale
+        in: query
+        name: locale
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/GameDetailDTO'
+              type: object
+      summary: 获取游戏详情 / Get game details
+      tags:
+      - client-game
+  /api/v1/client/homepage:
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 首页展示内容受后台游戏审核、促销活动配置影响；变更后缓存会在 TTL 内过期或由写操作主动失效。 [Client]
+        一次获取首页首屏所需的轮播、分类入口与各商品区块数据，支持 `?locale=`。'
+      parameters:
+      - description: BCP-47 locale
+        in: query
+        name: locale
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/HomepageResponseDTO'
+              type: object
+      summary: 获取首页业务数据 / Get homepage data
+      tags:
+      - client-homepage
+  /api/v1/client/library:
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 管理员可通过后台主动赠予或撤销用户的游戏授权（Admin Grant），客户端该接口的数据会相应增减。 [Client]
+        客户端获取用户已拥有的游戏列表（通过 purchase 或 gift 获得），用于游戏启动器或"我的游戏"页面展示。'
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/ListResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/PlayerLibrary'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取我的游戏库 / List library
+      tags:
+      - client-library
+  /api/v1/client/library/{game_id}/playtime:
+    put:
+      consumes:
+      - application/json
+      description: '[Dash] 管理端收集这些时长数据，用于分析游戏的热度指标以及防沉迷（如适用）的监控基础。 [Client] 游戏客户端定期上报当前游戏的游玩时间，累加
+        `PlayTimeMinutes`。'
+      parameters:
+      - description: Game ID
+        in: path
+        name: game_id
+        required: true
+        type: integer
+      - description: Playtime to add (minutes)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/UpdatePlayTimeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 更新游戏时长 / Update playtime
+      tags:
+      - client-library
+  /api/v1/client/order:
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 管理员在处理客服工单（如退款请求）时，会通过后台查看此订单数据，与用户视角的数据保持强一致。 [Client]
+        客户端查看用户的历史购买订单及其支付状态（如 pending, paid, refunded）。'
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/ListResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/Order'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取我的订单记录 / List orders
+      tags:
+      - client-order
+    post:
+      consumes:
+      - application/json
+      description: '[Dash] 订单的产生会增加平台的总流水，管理员在后台的订单与财务报表中可以对账并抽成（Platform Cut）。 [Client]
+        客户端发起购买请求（提交 game_id），系统扣除钱包余额或生成第三方支付订单，成功后即时授予资源访问权限。'
+      parameters:
+      - description: Order details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/CreateOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/Order'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 创建购买订单 / Create order
+      tags:
+      - client-order
+  /api/v1/client/post:
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 与游戏类似，只有通过管理端审核或自动化安全检查的内容才允许在此列表中展示。 [Client] 客户端调用获取
+        `published` 状态的社区帖子流，支持分页和分类浏览。'
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: size
+        type: integer
+      - description: Search query
+        in: query
+        name: query
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/ListResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/Post'
+                        type: array
+                    type: object
+              type: object
+      summary: 获取帖子列表 / List posts
+      tags:
+      - client-post
+  /api/v1/client/post/{id}:
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 管理员可在后台下架违规帖子，一旦下架，客户端调用该接口将返回资源不可用。 [Client] 查看特定帖子的正文及关联媒体。若帖子为付费内容（如
+        PPV 或 sub_only），接口将根据用户是否已购进行内容截断（TeaserLimit）或完整返回。'
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/Post'
+              type: object
+      summary: 获取帖子详情 / Get post details
+      tags:
+      - client-post
+  /api/v1/client/profile:
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 管理端无需直接调用此接口，但用户通过此接口查看的信息，在管理端对应的 `GET /api/v1/admin/user/:uuid`
+        接口中受管理员监控。 [Client] 客户端调用此接口获取当前登录用户的基本信息（昵称、头像等），用于展示个人中心。'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/User'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取个人信息 / Get user profile
+      tags:
+      - client-profile
+    put:
+      consumes:
+      - application/json
+      description: '[Dash] 用户修改的内容将即时反映在数据库中，管理员在后台用户列表中可以看到更新后的资料，并可通过后台接口进行封禁或强制修改。
+        [Client] 客户端提交更新表单，修改用户的公开资料设置。'
+      parameters:
+      - description: Profile details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/ClientUpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 更新个人信息 / Update user profile
+      tags:
+      - client-profile
+  /api/v1/client/promotion:
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 管理员在后台通过 `/admin/promotion` 配置的活动将直接决定此接口的返回内容和生命周期。 [Client]
+        获取当前正在进行的游戏促销活动及其关联的游戏折扣信息，用于首页轮播图或特卖专区展示。'
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/ListResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/Promotion'
+                        type: array
+                    type: object
+              type: object
+      summary: 获取活动列表 / List promotions
+      tags:
+      - client-promotion
+  /api/v1/client/wallet:
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 用户的钱包余额为平台负债的一部分，管理员通过后台统一对账系统的所有钱包资产。 [Client] 客户端展示用户当前钱包余额，供购买判断时使用。'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/Wallet'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取钱包余额 / Get wallet balance
+      tags:
+      - client-wallet
+  /api/v1/client/wallet/recharge:
+    post:
+      consumes:
+      - application/json
+      description: '[Dash] 管理端财务人员通过后台监控充值成功率和资金流水情况。 [Client] 客户端请求生成充值订单（选择如 Stripe
+        等渠道），用于唤起第三方支付组件。'
+      parameters:
+      - description: Recharge details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/RechargeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/RechargeRecord'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 发起充值请求 / Recharge wallet
+      tags:
+      - client-wallet
+  /api/v1/client/wallet/transaction:
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 若用户发生资金纠纷，管理端可对比后台交易流水，提供客服支持甚至发起 Offset 冲正操作。 [Client]
+        客户端分页展示用户的资金变动日志（充值、消费等）。'
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/ListResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/Transaction'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取资金明细 / List transactions
+      tags:
+      - client-wallet
+  /api/v1/dev/asset/{assetId}:
+    delete:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接业务作用。 [Client] 客户端程序通过此接口允许开发者删除游戏资产。'
+      parameters:
+      - description: Asset ID
+        in: path
+        name: assetId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 删除游戏资产 / Delete game asset
+      tags:
+      - dev-game-asset
+    put:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接业务作用。 [Client] 更新草稿/驳回状态的资产。尺寸规格同 `POST /dev/game/{id}/asset`。'
+      parameters:
+      - description: Asset ID
+        in: path
+        name: assetId
+        required: true
+        type: integer
+      - description: Asset update details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateAssetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/GameAsset'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 更新游戏资产 / Update game asset
+      tags:
+      - dev-game-asset
+  /api/v1/dev/game:
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接业务作用。 [Client] 客户端程序通过此接口获取当前开发者的游戏列表，支持状态过滤和分页。'
+      parameters:
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/ListResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/Game'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取开发者游戏列表 / Get developer games list
+      tags:
+      - dev-game
+    post:
+      consumes:
+      - application/json
+      description: |-
+        [Dash] 无直接业务作用。 [Client] 创建游戏草稿，支持多语言 translations。
+
+        **必填**: `translations[]`（至少 1 条，含 `locale` + `title`）。
+
+        **图片素材（URL，对标 Steam Store Graphical Assets）**:
+        - `header_image`: Header Capsule，推荐 **920×430** PNG/JPG
+        - `capsule_image`: Small Capsule，推荐 **462×174** PNG/JPG
+        - `capsule_image_v5`: 紧凑胶囊派生图（显示约 184×69）
+        - `background_image` / `background_raw_image`: 商店页背景，推荐 **1438×810** PNG/JPG
+        - `main_capsule_image`: Main Capsule，推荐 **1232×706** PNG/JPG
+        - `vertical_capsule_image`: Vertical Capsule，推荐 **748×896** PNG/JPG
+        - `library_*_image`: 库资产（600×900 / 3840×1240 / 透明 Logo / 920×430）
+        - `icon_image` / `app_icon_image`: **256×256** / **184×184** PNG
+
+        **截图与预告片** 通过 `POST /dev/game/{id}/asset` 添加（`role=screenshot` 至少 5 张 **1920×1080** 16:9 gameplay；`role=trailer` 推荐 **1920×1080** H.264+AAC MP4）。
+
+        服务端不校验像素尺寸；详见 `docs/game-store-materials.md` 与 Steamworks 文档。
+      parameters:
+      - description: Game details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/CreateGameRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/Game'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 创建游戏 / Create game
+      tags:
+      - dev-game
+  /api/v1/dev/game/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接业务作用。 [Client] 客户端程序通过此接口允许开发者删除草稿状态的游戏。'
+      parameters:
+      - description: Game ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 删除游戏 / Delete game
+      tags:
+      - dev-game
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接业务作用。 [Client] 客户端程序通过此接口获取开发者名下的某个游戏的详情（含全部 translations）。'
+      parameters:
+      - description: Game ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/Game'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取游戏详情 / Get game details
+      tags:
+      - dev-game
+    put:
+      consumes:
+      - application/json
+      description: |-
+        [Dash] 无直接业务作用。 [Client] 更新可编辑状态的游戏，支持按 locale upsert 翻译。
+
+        图片 URL 字段规格同 `POST /dev/game`（Header 920×430、Small Capsule 462×174、Background 1438×810）。截图/预告片见 Asset 接口。
+      parameters:
+      - description: Game ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Game details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateGameRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/Game'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 更新游戏 / Update game
+      tags:
+      - dev-game
+  /api/v1/dev/game/{id}/asset:
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接业务作用。 [Client] 客户端程序通过此接口获取当前开发者的指定游戏的资产列表。'
+      parameters:
+      - description: Game ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/GameAsset'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取游戏资产列表 / Get game assets list
+      tags:
+      - dev-game-asset
+    post:
+      consumes:
+      - application/json
+      description: |-
+        [Dash] 无直接业务作用。 [Client] 为游戏添加资产（截图、预告片、包体）。
+
+        **role=screenshot** (`asset_type=image`): 推荐 **1920×1080** 最小、**16:9**、实机 gameplay PNG/JPG；商店页至少 **5** 张。`thumbnail_url` 推荐 ~**600×338**。
+
+        **role=trailer** (`asset_type=video`): 推荐 **1920×1080**（或 1280×720）、16:9、H.264+AAC、≥5000 Kbps MP4；`url` 或 `metadata.hls_h264` 作播放地址；`translations` 存各语言标题。
+
+        **role=build** (`asset_type=build`): 游戏安装包，非展示素材。
+
+        其他 role：`header`/`capsule`/`background` 可复用主表图片规格（920×430、462×174、1438×810）。
+
+        详见 `docs/game-store-model.md`。
+      parameters:
+      - description: Game ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Asset details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/CreateAssetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/GameAsset'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 添加游戏资产 / Add game asset
+      tags:
+      - dev-game-asset
+  /api/v1/dev/game/{id}/submit-review:
+    post:
+      consumes:
+      - application/json
+      description: '[Dash] 开发者提交游戏后，审核员可以在后台审核列表看到该游戏。 [Client] 客户端程序通过此接口允许开发者将草稿状态的游戏提交审核。'
+      parameters:
+      - description: Game ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 提交游戏审核 / Submit game for review
+      tags:
+      - dev-game
+  /api/v1/dev/post:
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接业务作用。 [Client] 客户端程序通过此接口获取当前开发者的帖子列表，支持状态过滤和分页。'
+      parameters:
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/ListResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/Post'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取开发者帖子列表 / Get developer posts list
+      tags:
+      - dev-post
+    post:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接业务作用。 [Client] 客户端程序通过此接口允许开发者创建一个新的帖子草稿。'
+      parameters:
+      - description: Post details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/CreatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/Post'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 创建帖子 / Create post
+      tags:
+      - dev-post
+  /api/v1/dev/post/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接业务作用。 [Client] 客户端程序通过此接口允许开发者删除草稿状态的帖子。'
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 删除帖子 / Delete post
+      tags:
+      - dev-post
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接业务作用。 [Client] 客户端程序通过此接口获取开发者名下的某个帖子的详情。'
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/Post'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取帖子详情 / Get post details
+      tags:
+      - dev-post
+    put:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接业务作用。 [Client] 客户端程序通过此接口允许开发者更新处于可编辑状态的帖子信息。'
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Post details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/UpdatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/Post'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 更新帖子 / Update post
+      tags:
+      - dev-post
+  /api/v1/dev/post/{id}/submit-review:
+    post:
+      consumes:
+      - application/json
+      description: '[Dash] 开发者提交帖子后，审核员可以在后台审核列表看到该帖子。 [Client] 客户端程序通过此接口允许开发者将草稿状态的帖子提交审核。'
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 提交帖子审核 / Submit post for review
+      tags:
+      - dev-post
+  /api/v1/dev/profile:
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接业务作用。 [Client] 客户端程序通过此接口获取当前开发者的公司名称、税务等资料和认证状态。'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/DeveloperProfile'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取开发者资料 / Get developer profile
+      tags:
+      - dev-profile
+    put:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接业务作用。 [Client] 客户端程序通过此接口更新当前开发者的资料。更新敏感信息后验证状态将变为 pending。'
+      parameters:
+      - description: Profile details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/DevUpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 更新开发者资料 / Update developer profile
+      tags:
+      - dev-profile
+  /api/v1/dev/transaction:
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接业务作用。 [Client] 客户端程序通过此接口获取当前开发者的钱包交易流水（分页）。'
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/ListResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/Transaction'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取交易流水 / Get transactions
+      tags:
+      - dev-wallet
+  /api/v1/dev/wallet:
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接业务作用。 [Client] 客户端程序通过此接口获取当前开发者的钱包余额等信息。'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/Wallet'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取开发者钱包余额 / Get developer wallet
+      tags:
+      - dev-wallet
+  /api/v1/dev/withdrawal:
+    get:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接业务作用。 [Client] 客户端程序通过此接口获取当前开发者的提现记录（分页）。'
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/ListResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/WithdrawalRequest'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取提现记录 / Get withdrawal requests
+      tags:
+      - dev-wallet
+    post:
+      consumes:
+      - application/json
+      description: '[Dash] 开发者申请提现后，将在后台审核列表出现。 [Client] 客户端程序通过此接口发起提现申请，并从钱包余额中预扣除金额。'
+      parameters:
+      - description: Withdrawal details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/CreateWithdrawalReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/WithdrawalRequest'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 申请提现 / Create withdrawal request
+      tags:
+      - dev-wallet
+  /client/post/{id}/media/{mediaId}/access:
+    get:
+      description: '[Dash] 无直接作用。 [Client] 终端用户获取媒体 public_url 或 presigned URL。'
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Media ID
+        in: path
+        name: mediaId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/PresignGetResult'
+              type: object
+      summary: 获取帖子媒体访问 URL
+      tags:
+      - client-post
+  /dev/post/{id}/media:
+    get:
+      description: '[Dash] 无直接作用。 [Client] 开发者查看帖子关联媒体及 storage_object。'
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/Media'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 列出帖子媒体
+      tags:
+      - dev-post
+    post:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接作用。 [Client] 开发者直传完成后确认媒体，写入 media 并更新 storage_objects。'
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 媒体信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/attachMediaRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/Media'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 确认帖子媒体上传
+      tags:
+      - dev-post
+  /dev/storage/confirm:
+    post:
+      consumes:
+      - application/json
+      description: '[Dash] 直传 R2 完成后确认对象，返回 CDN public_url 供游戏物料字段回填。 [Client] 开发者上传游戏商店/库素材后获取可公开访问的
+        URL。'
+      parameters:
+      - description: storage_object_id
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/confirmUploadRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/ConfirmUploadResult'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 确认上传完成
+      tags:
+      - dev-storage
+  /dev/storage/domains:
+    get:
+      description: '[Dash] 无直接作用。 [Client] 开发者查看当前 R2 Custom Domain 配置。'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/CustomDomainInfo'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 列出 Custom Domains 配置
+      tags:
+      - dev-storage
+  /dev/storage/object:
+    delete:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接作用。 [Client] 开发者删除自己上传的对象。'
+      parameters:
+      - description: 对象 key
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/deleteObjectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/JSONResult'
+      security:
+      - BearerAuth: []
+      summary: 删除存储对象
+      tags:
+      - dev-storage
+    get:
+      description: '[Dash] 无直接作用。 [Client] 开发者分页查看 storage_objects 注册表。'
+      parameters:
+      - default: 1
+        description: Page
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/ListResult'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 列出开发者的存储对象
+      tags:
+      - dev-storage
+  /dev/storage/presign-get:
+    post:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接作用。 [Client] 开发者获取自己对象的 Presigned GET URL。'
+      parameters:
+      - description: 对象 key
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/presignGetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/PresignGetResult'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 申请下载 Presigned URL
+      tags:
+      - dev-storage
+  /dev/storage/presign-put:
+    post:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接作用。 [Client] 开发者获取直传 R2 的 Presigned PUT URL，并预注册 storage_objects。'
+      parameters:
+      - description: 上传参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/presignPutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/PresignPutResult'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 申请上传 Presigned URL
+      tags:
+      - dev-storage
+  /webhooks/supabase/auth:
+    post:
+      consumes:
+      - application/json
+      description: '[Dash] 无直接作用。 [Client] 无直接作用。GoTrue 在新用户创建后回调此接口，同步 users 表。'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/JSONResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/JSONResult'
+      summary: Supabase after-user-created Hook
+      tags:
+      - Webhook
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

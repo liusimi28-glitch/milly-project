@@ -1,19 +1,62 @@
 <script setup lang="ts">
 import { SearchIcon } from '@lucide/vue'
+import { useDebounceFn } from '@vueuse/core'
+import type { Product } from '~/types'
 
-const { searchSuggestions } = useMockProducts()
+const locale = useHomepageLocale()
+const { publicClient } = useApiClient()
+const { productLink } = useProductRoute()
+const { bestsellers } = useHomepage()
 
 const query = ref('')
+const debouncedQuery = ref('')
 const isFocused = ref(false)
 const searchRef = ref<HTMLElement | null>(null)
+const searchResults = ref<Product[]>([])
+const searchPending = ref(false)
 
-const filteredSuggestions = computed(() => {
-  const q = query.value.trim().toLowerCase()
-  if (!q) return searchSuggestions.slice(0, 6)
-  return searchSuggestions.filter(s => s.toLowerCase().includes(q)).slice(0, 6)
+const updateDebouncedQuery = useDebounceFn((value: string) => {
+  debouncedQuery.value = value.trim()
+}, 300)
+
+watch(query, value => updateDebouncedQuery(value))
+
+watch(debouncedQuery, async (value) => {
+  if (!value) {
+    searchResults.value = []
+    return
+  }
+
+  searchPending.value = true
+  try {
+    const { fetchGameList } = await import('~/lib/api/game')
+    const { mapGameListItemToProduct } = await import('~/lib/mappers/gameDetail')
+    const result = await fetchGameList(publicClient.value, {
+      locale: locale.value,
+      query: value,
+      size: 8,
+    })
+    searchResults.value = result.items.map(mapGameListItemToProduct)
+  }
+  catch {
+    searchResults.value = []
+  }
+  finally {
+    searchPending.value = false
+  }
 })
 
-const showDropdown = computed(() => isFocused.value && filteredSuggestions.value.length > 0)
+const fallbackSuggestions = computed(() =>
+  bestsellers.value.slice(0, 6).map(product => product.title),
+)
+
+const showResults = computed(() =>
+  isFocused.value && debouncedQuery.value.length > 0,
+)
+
+const showFallback = computed(() =>
+  isFocused.value && !debouncedQuery.value && fallbackSuggestions.value.length > 0,
+)
 
 function onBlur(event: FocusEvent) {
   const related = event.relatedTarget as Node | null
@@ -21,6 +64,12 @@ function onBlur(event: FocusEvent) {
   window.setTimeout(() => {
     isFocused.value = false
   }, 150)
+}
+
+function goToGames(search?: string) {
+  const params = new URLSearchParams({ locale: locale.value })
+  if (search?.trim()) params.set('q', search.trim())
+  navigateTo(`/games?${params.toString()}`)
 }
 </script>
 
@@ -39,6 +88,7 @@ function onBlur(event: FocusEvent) {
         autocomplete="off"
         @focus="isFocused = true"
         @blur="onBlur"
+        @keydown.enter.prevent="goToGames(query)"
       >
     </div>
 
@@ -51,12 +101,47 @@ function onBlur(event: FocusEvent) {
       leave-to-class="opacity-0 -translate-y-1"
     >
       <ul
-        v-if="showDropdown"
+        v-if="showResults"
+        class="absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-g2a-border bg-white py-1 shadow-lg"
+        role="listbox"
+      >
+        <li v-if="searchPending" class="px-3 py-2 text-sm text-g2a-muted">
+          搜索中…
+        </li>
+        <li
+          v-for="product in searchResults"
+          :key="product.id"
+          role="option"
+        >
+          <NuxtLink
+            :to="productLink(product.id)"
+            class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-g2a-text transition-colors duration-[var(--motion-fast)] hover:bg-g2a-gray"
+          >
+            <SearchIcon class="size-3.5 shrink-0 text-g2a-muted" aria-hidden="true" />
+            {{ product.title }}
+          </NuxtLink>
+        </li>
+        <li v-if="!searchPending && searchResults.length === 0" class="px-3 py-2 text-sm text-g2a-muted">
+          未找到相关游戏
+        </li>
+        <li>
+          <button
+            type="button"
+            class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium text-g2a-blue hover:bg-g2a-gray"
+            @mousedown.prevent="goToGames(query)"
+          >
+            查看全部搜索结果
+          </button>
+        </li>
+      </ul>
+
+      <ul
+        v-else-if="showFallback"
         class="absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-g2a-border bg-white py-1 shadow-lg"
         role="listbox"
       >
         <li
-          v-for="suggestion in filteredSuggestions"
+          v-for="suggestion in fallbackSuggestions"
           :key="suggestion"
           role="option"
         >

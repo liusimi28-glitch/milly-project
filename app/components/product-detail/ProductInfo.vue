@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import type { ProductDetail } from '~/types'
 import { MonitorIcon, ShoppingCartIcon, ZapIcon } from '@lucide/vue'
+import { ApiError } from '~/lib/api/client'
+import type { ProductDetail } from '~/types'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -10,8 +11,15 @@ const props = defineProps<{
 
 const quantity = defineModel<number>('quantity', { default: 1 })
 
+const { isLoggedIn } = useApiAuth()
+const { placeOrder } = useOrders()
+const { withLocale } = useProductRoute()
+const router = useRouter()
+
 const cartFeedback = ref<'idle' | 'added'>('idle')
 const isBuying = ref(false)
+const buyError = ref('')
+const buySuccess = ref(false)
 
 const maxQuantity = computed(() => Math.min(props.product.stockCount, 10))
 
@@ -34,9 +42,31 @@ async function handleAddToCart() {
 async function handleBuyNow() {
   if (!props.product.inStock) return
 
+  buyError.value = ''
+  buySuccess.value = false
+
+  if (!isLoggedIn.value) {
+    buyError.value = '请先登录后再购买'
+    return
+  }
+
   isBuying.value = true
-  await new Promise(resolve => setTimeout(resolve, 800))
-  isBuying.value = false
+  try {
+    await placeOrder({ game_id: Number(props.product.id) })
+    buySuccess.value = true
+    await router.push(withLocale('/library'))
+  }
+  catch (error) {
+    if (error instanceof ApiError && error.isUnauthorized) {
+      buyError.value = '请先登录后再购买'
+    }
+    else {
+      buyError.value = error instanceof Error ? error.message : '购买失败，请稍后重试'
+    }
+  }
+  finally {
+    isBuying.value = false
+  }
 }
 </script>
 
@@ -147,6 +177,13 @@ async function handleBuyNow() {
       :disabled="!product.inStock"
     />
 
+    <p v-if="buyError" class="text-sm text-red-600" role="alert">
+      {{ buyError }}
+    </p>
+    <p v-if="buySuccess" class="text-sm text-green-600">
+      购买成功，正在跳转到游戏库…
+    </p>
+
     <div class="flex flex-col gap-3 sm:flex-row">
       <Button
         size="lg"
@@ -181,18 +218,17 @@ async function handleBuyNow() {
 
     <div
       v-if="product.supportUrl || product.supportEmail"
-      class="rounded-lg border border-g2a-border bg-white p-4 text-sm text-g2a-muted"
+      class="rounded-lg border border-g2a-border bg-white p-4 text-sm"
     >
-      <div class="mb-2 flex items-center gap-2 font-medium text-g2a-text">
-        <MonitorIcon class="size-4" />
+      <p class="mb-2 font-medium text-g2a-text">
         客服支持
-      </div>
+      </p>
       <p v-if="product.supportUrl">
         <a
           :href="product.supportUrl"
           target="_blank"
           rel="noopener noreferrer"
-          class="text-g2a-blue hover:underline"
+          class="text-g2a-blue hover:text-g2a-orange"
         >
           {{ product.supportUrl }}
         </a>
@@ -203,7 +239,7 @@ async function handleBuyNow() {
       >
         <a
           :href="`mailto:${product.supportEmail}`"
-          class="text-g2a-blue hover:underline"
+          class="text-g2a-blue hover:text-g2a-orange"
         >
           {{ product.supportEmail }}
         </a>

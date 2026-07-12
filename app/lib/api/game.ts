@@ -1,17 +1,32 @@
-import { apiGet } from '~/lib/api/client'
-import type { GameDetailResponse, GameListResponse } from '~/types/api/game'
+import type { ApiClient } from '~/lib/api/client'
+import type { ListResult } from '~/types/api/common'
+import type { GameDetail, GameListItem } from '~/types/api/game'
+
+export interface FetchGameListParams {
+  locale: string
+  page?: number
+  size?: number
+  query?: string
+  tag?: string
+}
 
 export function fetchGameDetail(
-  baseUrl: string,
+  client: ApiClient,
   id: string,
   locale: string,
-): Promise<GameDetailResponse> {
-  return apiGet<GameDetailResponse>(baseUrl, `/api/v1/client/game/${encodeURIComponent(id)}`, { locale })
+): Promise<GameDetail> {
+  return client.get<GameDetail>(`/api/v1/client/game/${encodeURIComponent(id)}`, { locale })
 }
 
 export function fetchGameList(
-  baseUrl: string,
-  locale: string,
-): Promise<GameListResponse> {
-  return apiGet<GameListResponse>(baseUrl, '/api/v1/client/game', { locale })
+  client: ApiClient,
+  params: FetchGameListParams,
+): Promise<ListResult<GameListItem>> {
+  return client.get<ListResult<GameListItem>>('/api/v1/client/game', {
+    locale: params.locale,
+    page: params.page,
+    size: params.size,
+    query: params.query,
+    tag: params.tag,
+  })
 }

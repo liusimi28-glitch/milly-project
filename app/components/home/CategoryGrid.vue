@@ -4,11 +4,13 @@ import { getCategoryIcon } from '@/lib/category-icons'
 
 const { categoryQuickLinks } = useHomepage()
 const { prefersReducedMotion } = useReducedMotion()
+const locale = useHomepageLocale()
 
 const hasCategories = computed(() => categoryQuickLinks.value.length > 0)
 
 function categoryHref(category: Category) {
-  return `/category/${category.slug}`
+  const params = new URLSearchParams({ locale: locale.value, tag: category.slug })
+  return `/games?${params.toString()}`
 }
 
 const iconClass = computed(() => [

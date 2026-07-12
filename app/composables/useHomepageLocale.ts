@@ -3,12 +3,7 @@ const DEFAULT_LOCALE = 'en'
 export function useHomepageLocale() {
   const route = useRoute()
 
-  return useState<string>('homepage-locale', () => {
-    const queryLocale = typeof route.query.locale === 'string' ? route.query.locale.trim() : ''
-    if (queryLocale) {
-      return normalizeLocale(queryLocale)
-    }
-
+  const fallbackLocale = useState<string>('homepage-locale-fallback', () => {
     if (import.meta.server) {
       const headers = useRequestHeaders(['accept-language'])
       const acceptLanguage = headers['accept-language']
@@ -19,12 +14,21 @@ export function useHomepageLocale() {
         }
       }
     }
-
     return DEFAULT_LOCALE
   })
+
+  const locale = computed(() => {
+    const queryLocale = typeof route.query.locale === 'string' ? route.query.locale.trim() : ''
+    if (queryLocale) {
+      return normalizeLocale(queryLocale)
+    }
+    return fallbackLocale.value
+  })
+
+  return locale
 }
 
-function normalizeLocale(locale: string): string {
+export function normalizeLocale(locale: string): string {
   const trimmed = locale.trim().toLowerCase()
   if (!trimmed) return DEFAULT_LOCALE
   if (trimmed.startsWith('zh')) return 'zh-CN'

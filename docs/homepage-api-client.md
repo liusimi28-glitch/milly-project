@@ -1,5 +1,7 @@
 # 客户端首页 API 对接
 
+> 完整 client API 索引见 [`api-client.md`](./api-client.md)。
+
 ## 环境变量
 
 ```bash
@@ -20,10 +22,11 @@ NUXT_PUBLIC_API_BASE_URL=http://localhost:46002
 |-----|-----|
 | `HomepageGameCard` | `Product`（价格 cents/100，竖版封面优先 `library_capsule_image`） |
 | `HomepageBanner` | `Banner`（`/promotion/:id` 链接映射为 `/product/:id`） |
-| `HomepageCategory` | `Category`（icon 空时用 slug 回退） |
+| `HomepageCategory` | `Category`（icon 空时用 slug 回退；链接至 `/games?tag={slug}`） |
 
 占位字段：`seller` = `SiteA`，`sellerRating` = `4.5`，`region` = `Global`。
 
 ## 仍使用 mock 的模块
 
-- `AppHeader` / `AppFooter` / `AppTopBar` / `AppSearchBar`
+- `AppHeader` / `AppFooter` / `AppTopBar` 部分导航
+- Footer 支付图标等纯展示内容

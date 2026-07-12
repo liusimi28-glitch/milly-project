@@ -1,10 +1,3 @@
-export interface ApiResponse<T> {
-  data: T
-  error_no: number
-  error_msg: string
-  request_id: string
-}
-
 export interface HomepageBanner {
   id: number
   title: string

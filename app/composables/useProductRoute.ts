@@ -8,18 +8,26 @@ export function useProductRoute() {
     }
   }
 
-  function withLocale(path: string) {
+  function withLocale(path: string, extraQuery?: Record<string, string>) {
     if (!path.startsWith('/')) {
       return path
     }
 
+    const query: Record<string, string> = {
+      locale: locale.value,
+      ...extraQuery,
+    }
+
     if (path.startsWith('/product/')) {
-      return productLink(path.replace('/product/', ''))
+      return {
+        path,
+        query,
+      }
     }
 
     return {
       path,
-      query: { locale: locale.value },
+      query,
     }
   }
 
