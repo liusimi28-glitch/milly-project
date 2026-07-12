@@ -163,3 +163,29 @@ bun run preview
 ```
 
 请查阅 [部署文档](https://nuxt.com/docs/getting-started/deployment) 了解有关应用部署的更多信息。
+
+## 国际化（i18n）
+
+### 内容语言（BCP-47）
+
+商店可翻译内容（游戏标题/描述、标签名称等）与后端 `mall-back/internal/model/locale.go` → `SupportedLocales` 保持一致，共 **15** 种语言。客户端通过 API `?locale=` 或 `Accept-Language` 请求对应语言。
+
+| 代码 | 语言 |
+|------|------|
+| `en` | English（英语） |
+| `zh-CN` | 简体中文 |
+| `zh-TW` | 繁體中文 |
+| `ar` | العربية（阿拉伯语） |
+| `ja` | 日本語（日语） |
+| `ko` | 한국어（韩语） |
+| `id` | Bahasa Indonesia（印尼语） |
+| `th` | ไทย（泰语） |
+| `vi` | Tiếng Việt（越南语） |
+| `ms` | Bahasa Melayu（马来语） |
+| `hi` | हिन्दी（印地语） |
+| `bn` | বাংলা（孟加拉语） |
+| `fil` | Filipino（菲律宾语） |
+| `ur` | اردو（乌尔都语） |
+| `tr` | Türkçe（土耳其语） |
+
+未命中翻译时，后端按 **请求 locale → `en` → `zh-CN` → 任意已有翻译** 回落。首页等接口示例：`GET /api/v1/client/homepage?locale=zh-CN`。
