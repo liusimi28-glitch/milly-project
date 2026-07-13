@@ -10,7 +10,7 @@ export interface ListResult<T> {
   total: number
 }
 
-export type PaymentMethod = 'wallet' | 'stripe' | 'abpay'
+export type PaymentMethod = 'wallet' | 'token' | 'stripe' | 'abpay'
 export type OrderStatus = 'pending' | 'paid' | 'refunded'
 export type AcquireMethod = 'purchase' | 'gift' | 'admin_grant'
 export type ControllerSupport = 'none' | 'partial' | 'full'

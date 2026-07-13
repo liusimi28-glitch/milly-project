@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { MonitorIcon, ShoppingCartIcon, ZapIcon } from '@lucide/vue'
+import { ShoppingCartIcon, ZapIcon } from '@lucide/vue'
 import { ApiError } from '~/lib/api/client'
 import type { ProductDetail } from '~/types'
+import type { TokenType } from '~/types/api/order'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -13,6 +14,7 @@ const quantity = defineModel<number>('quantity', { default: 1 })
 
 const { isLoggedIn } = useApiAuth()
 const { placeOrder } = useOrders()
+const { tokenBalances, tokenEnabled, refreshTokenBalances } = useTokenWallet()
 const { withLocale } = useProductRoute()
 const router = useRouter()
 
@@ -20,6 +22,13 @@ const cartFeedback = ref<'idle' | 'added'>('idle')
 const isBuying = ref(false)
 const buyError = ref('')
 const buySuccess = ref(false)
+const selectedTokenType = ref<TokenType>('promo_token')
+
+const TOKEN_OPTIONS: { type: TokenType, label: string }[] = [
+  { type: 'promo_token', label: '促销代币' },
+  { type: 'main_token', label: '主代币' },
+  { type: 'reward_token', label: '奖励代币' },
+]
 
 const maxQuantity = computed(() => Math.min(props.product.stockCount, 10))
 
@@ -27,9 +36,52 @@ const displayPrice = computed(() => props.product.priceFormatted ?? formatFallba
 const displayOriginalPrice = computed(() => props.product.originalPriceFormatted
   ?? (props.product.originalPrice ? formatFallbackPrice(props.product.originalPrice) : undefined))
 
+const showTokenCheckout = computed(() => !props.product.isFree && props.product.inStock)
+
+const selectedTokenAvailable = computed(() => {
+  if (!tokenBalances.value) return '0'
+  return tokenBalances.value[selectedTokenType.value]?.available ?? '0'
+})
+
+const hasSufficientToken = computed(() => {
+  if (props.product.isFree) return false
+  return tokenAvailableGte(selectedTokenAvailable.value, props.product.price)
+})
+
+const canBuyNow = computed(() => {
+  if (!props.product.inStock || props.product.isFree) return false
+  if (!tokenEnabled.value) return false
+  return hasSufficientToken.value
+})
+
 function formatFallbackPrice(value: number) {
   return `$${value.toFixed(2)}`
 }
+
+function tokenAvailableGte(available: string, price: number) {
+  const avail = Number.parseFloat(available)
+  if (Number.isNaN(avail)) return false
+  return avail >= price
+}
+
+function pickDefaultTokenType() {
+  if (!tokenBalances.value) {
+    selectedTokenType.value = 'promo_token'
+    return
+  }
+  const price = props.product.price
+  const priority: TokenType[] = ['promo_token', 'main_token', 'reward_token']
+  for (const type of priority) {
+    const available = tokenBalances.value[type]?.available ?? '0'
+    if (tokenAvailableGte(available, price)) {
+      selectedTokenType.value = type
+      return
+    }
+  }
+  selectedTokenType.value = 'promo_token'
+}
+
+watch([tokenBalances, () => props.product.price], pickDefaultTokenType, { immediate: true })
 
 async function handleAddToCart() {
   if (!props.product.inStock) return
@@ -50,10 +102,29 @@ async function handleBuyNow() {
     return
   }
 
+  if (props.product.isFree) {
+    buyError.value = '免费游戏暂不支持在线获取，请稍后再试'
+    return
+  }
+
+  if (!tokenEnabled.value) {
+    buyError.value = '代币钱包未开启，暂无法购买'
+    return
+  }
+
+  if (!hasSufficientToken.value) {
+    buyError.value = '所选代币余额不足，请前往钱包查看或更换支付方式'
+    return
+  }
+
   isBuying.value = true
   try {
-    await placeOrder({ game_id: Number(props.product.id) })
+    await placeOrder({
+      game_id: Number(props.product.id),
+      token_type: selectedTokenType.value,
+    })
     buySuccess.value = true
+    await refreshTokenBalances()
     await router.push(withLocale('/library'))
   }
   catch (error) {
@@ -177,6 +248,46 @@ async function handleBuyNow() {
       :disabled="!product.inStock"
     />
 
+    <div
+      v-if="showTokenCheckout"
+      class="rounded-lg border border-g2a-border bg-g2a-gray/60 p-4"
+    >
+      <p class="text-xs font-medium uppercase tracking-wide text-g2a-muted">
+        支付方式
+      </p>
+      <p v-if="!tokenEnabled" class="mt-2 text-sm text-g2a-muted">
+        代币钱包未开启，暂无法购买
+      </p>
+      <div v-else class="mt-3 flex flex-col gap-2">
+        <button
+          v-for="option in TOKEN_OPTIONS"
+          :key="option.type"
+          type="button"
+          :class="cn(
+            'flex items-center justify-between rounded-lg border px-4 py-3 text-left text-sm transition-colors',
+            selectedTokenType === option.type
+              ? 'border-g2a-orange bg-white text-g2a-text'
+              : 'border-g2a-border bg-white text-g2a-text hover:border-g2a-orange/60',
+          )"
+          @click="selectedTokenType = option.type"
+        >
+          <span class="font-medium">{{ option.label }}</span>
+          <span class="text-g2a-muted">
+            可用 {{ tokenBalances?.[option.type]?.available ?? '0' }}
+          </span>
+        </button>
+        <p
+          v-if="tokenEnabled && !hasSufficientToken"
+          class="text-sm text-g2a-muted"
+        >
+          所选代币余额不足，
+          <NuxtLink :to="withLocale('/wallet')" class="text-g2a-blue hover:text-g2a-orange">
+            前往钱包
+          </NuxtLink>
+        </p>
+      </div>
+    </div>
+
     <p v-if="buyError" class="text-sm text-red-600" role="alert">
       {{ buyError }}
     </p>
@@ -201,7 +312,7 @@ async function handleBuyNow() {
       <Button
         variant="outline"
         size="lg"
-        :disabled="!product.inStock || isBuying"
+        :disabled="!canBuyNow || isBuying"
         class="h-11 flex-1 gap-2 border-g2a-border text-base font-semibold text-g2a-text hover:border-g2a-orange hover:bg-white hover:text-g2a-orange active:scale-[0.98]"
         @click="handleBuyNow"
       >
