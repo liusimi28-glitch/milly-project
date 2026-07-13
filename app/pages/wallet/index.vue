@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const { isLoggedIn } = useApiAuth()
 const { wallet, transactions, pending, error, refreshWallet, recharge } = useWallet()
+const { tokenBalances, tokenLedger, tokenEnabled, pending: tokenPending } = useTokenWallet()
 
 const rechargeAmount = ref(10)
 const rechargePending = ref(false)
@@ -62,6 +63,58 @@ useHead({ title: '我的钱包 | milly-project' })
           </p>
           <p v-else class="mt-2 text-4xl font-bold text-g2a-orange">
             {{ wallet?.currency ?? 'USD' }} {{ (wallet?.balance ?? 0).toFixed(2) }}
+          </p>
+        </div>
+
+        <div class="rounded-xl border border-g2a-border bg-white p-6">
+          <h2 class="text-lg font-semibold text-g2a-text">
+            代币余额
+          </h2>
+          <p v-if="tokenPending" class="mt-4 text-sm text-g2a-muted">
+            加载中…
+          </p>
+          <p v-else-if="!tokenEnabled" class="mt-4 text-sm text-g2a-muted">
+            代币功能未开启
+          </p>
+          <div v-else class="mt-4 grid gap-4 sm:grid-cols-3">
+            <div
+              v-for="item in [
+                { key: 'main_token', label: '主代币', data: tokenBalances?.main_token },
+                { key: 'reward_token', label: '奖励代币', data: tokenBalances?.reward_token },
+                { key: 'promo_token', label: '促销代币', data: tokenBalances?.promo_token },
+              ]"
+              :key="item.key"
+              class="rounded-lg border border-g2a-border p-4"
+            >
+              <p class="text-xs text-g2a-muted">
+                {{ item.label }}
+              </p>
+              <p class="mt-1 text-lg font-semibold text-g2a-text">
+                {{ item.data?.available ?? '0' }}
+              </p>
+              <p class="text-xs text-g2a-muted">
+                余额 {{ item.data?.balance ?? '0' }} · 冻结 {{ item.data?.frozen ?? '0' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="tokenEnabled" class="rounded-xl border border-g2a-border bg-white p-6">
+          <h2 class="text-lg font-semibold text-g2a-text">
+            代币流水
+          </h2>
+          <ul v-if="tokenLedger.length > 0" class="mt-4 space-y-3">
+            <li
+              v-for="tx in tokenLedger"
+              :key="tx.id"
+              class="flex items-center justify-between border-b border-g2a-border pb-3 text-sm last:border-0"
+            >
+              <span class="text-g2a-text">{{ tx.biz_type }} · {{ tx.token_type }}</span>
+              <span class="font-medium text-g2a-text">{{ tx.change_amount }}</span>
+            </li>
+          </ul>
+          <p v-else class="mt-4 text-sm text-g2a-muted">
+            暂无代币流水
           </p>
         </div>
 
