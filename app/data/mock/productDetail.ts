@@ -112,6 +112,11 @@ export function buildProductDetail(product: Product): ProductDetail {
     developers: [],
     publishers: [],
     supportedLanguages: [],
+    prices: [
+      { currency_type: 'main_token', base_token_amount: Math.round(product.price), original_token_amount: Math.round(product.originalPrice ?? product.price) },
+      { currency_type: 'reward_token', base_token_amount: Math.round(product.price), original_token_amount: Math.round(product.originalPrice ?? product.price) },
+      { currency_type: 'promo_token', base_token_amount: Math.round(product.price), original_token_amount: Math.round(product.originalPrice ?? product.price) },
+    ],
   }
 }
 

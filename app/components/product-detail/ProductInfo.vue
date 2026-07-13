@@ -4,6 +4,7 @@ import { ApiError } from '~/lib/api/client'
 import type { ProductDetail } from '~/types'
 import type { TokenType } from '~/types/api/order'
 import { Button } from '@/components/ui/button'
+import { tokenPriceForType } from '~/lib/mappers/gameDetail'
 import { cn } from '@/lib/utils'
 
 const props = defineProps<{
@@ -32,20 +33,32 @@ const TOKEN_OPTIONS: { type: TokenType, label: string }[] = [
 
 const maxQuantity = computed(() => Math.min(props.product.stockCount, 10))
 
-const displayPrice = computed(() => props.product.priceFormatted ?? formatFallbackPrice(props.product.price))
-const displayOriginalPrice = computed(() => props.product.originalPriceFormatted
-  ?? (props.product.originalPrice ? formatFallbackPrice(props.product.originalPrice) : undefined))
+const selectedTokenPrice = computed(() =>
+  tokenPriceForType(props.product.prices, selectedTokenType.value))
+
+const displayPrice = computed(() => {
+  if (props.product.isFree) return '免费'
+  const amount = selectedTokenPrice.value || props.product.price
+  return `${amount} 代币`
+})
+const displayOriginalPrice = computed(() => {
+  const row = props.product.prices?.find(p => p.currency_type === selectedTokenType.value)
+  const original = row?.original_token_amount ?? props.product.originalPrice ?? 0
+  const base = selectedTokenPrice.value || props.product.price
+  if (original > base) return `${original} 代币`
+  return undefined
+})
 
 const showTokenCheckout = computed(() => !props.product.isFree && props.product.inStock)
 
 const selectedTokenAvailable = computed(() => {
-  if (!tokenBalances.value) return '0'
-  return tokenBalances.value[selectedTokenType.value]?.available ?? '0'
+  if (!tokenBalances.value) return 0
+  return tokenBalances.value[selectedTokenType.value]?.available ?? 0
 })
 
 const hasSufficientToken = computed(() => {
   if (props.product.isFree) return false
-  return tokenAvailableGte(selectedTokenAvailable.value, props.product.price)
+  return selectedTokenAvailable.value >= selectedTokenPrice.value
 })
 
 const canBuyNow = computed(() => {
@@ -54,26 +67,16 @@ const canBuyNow = computed(() => {
   return hasSufficientToken.value
 })
 
-function formatFallbackPrice(value: number) {
-  return `$${value.toFixed(2)}`
-}
-
-function tokenAvailableGte(available: string, price: number) {
-  const avail = Number.parseFloat(available)
-  if (Number.isNaN(avail)) return false
-  return avail >= price
-}
-
 function pickDefaultTokenType() {
   if (!tokenBalances.value) {
     selectedTokenType.value = 'promo_token'
     return
   }
-  const price = props.product.price
   const priority: TokenType[] = ['promo_token', 'main_token', 'reward_token']
   for (const type of priority) {
-    const available = tokenBalances.value[type]?.available ?? '0'
-    if (tokenAvailableGte(available, price)) {
+    const available = tokenBalances.value[type]?.available ?? 0
+    const price = tokenPriceForType(props.product.prices, type)
+    if (available >= price && price > 0) {
       selectedTokenType.value = type
       return
     }
@@ -81,7 +84,7 @@ function pickDefaultTokenType() {
   selectedTokenType.value = 'promo_token'
 }
 
-watch([tokenBalances, () => props.product.price], pickDefaultTokenType, { immediate: true })
+watch([tokenBalances, () => props.product.prices], pickDefaultTokenType, { immediate: true })
 
 async function handleAddToCart() {
   if (!props.product.inStock) return
@@ -273,7 +276,7 @@ async function handleBuyNow() {
         >
           <span class="font-medium">{{ option.label }}</span>
           <span class="text-g2a-muted">
-            可用 {{ tokenBalances?.[option.type]?.available ?? '0' }}
+            可用 {{ tokenBalances?.[option.type]?.available ?? 0 }}
           </span>
         </button>
         <p

@@ -122,4 +122,5 @@ export interface ProductDetail extends Product {
   supportEmail?: string
   priceFormatted?: string
   originalPriceFormatted?: string
+  prices: import('~/types/api/game').GamePrice[]
 }

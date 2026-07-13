@@ -1,3 +1,5 @@
+import type { GamePrice } from '~/types/api/game'
+
 export interface HomepageBanner {
   id: number
   title: string
@@ -22,11 +24,9 @@ export interface HomepageGameCard {
   capsule_image: string
   library_capsule_image: string
   vertical_capsule_image?: string
-  currency: string
-  base_price_cents: number
-  original_price_cents: number
-  price_formatted: string
-  original_price_formatted: string
+  prices: GamePrice[]
+  base_token_amount: number
+  original_token_amount: number
   discount_percent?: number
   is_free: boolean
   platform_windows: boolean

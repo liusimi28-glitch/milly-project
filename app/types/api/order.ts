@@ -11,7 +11,7 @@ export interface Order {
   paid_amount?: number
   original_price?: number
   token_type?: string
-  token_amount?: string
+  token_amount?: number
   created_at?: string
   updated_at?: string
 }

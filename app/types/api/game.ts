@@ -7,6 +7,12 @@ export interface GameTag {
   tag_type?: string
 }
 
+export interface GamePrice {
+  currency_type: 'main_token' | 'reward_token' | 'promo_token' | string
+  base_token_amount: number
+  original_token_amount: number
+}
+
 export interface GameSupportedLanguage {
   language_code: string
   has_full_audio?: boolean
@@ -33,11 +39,7 @@ export interface GameListItem {
   short_description?: string
   header_image: string
   main_capsule_image?: string
-  currency: string
-  base_price_cents: number
-  original_price_cents: number
-  price_formatted: string
-  original_price_formatted: string
+  prices: GamePrice[]
   is_free: boolean
   coming_soon: boolean
   early_access?: boolean

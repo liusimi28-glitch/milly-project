@@ -1,7 +1,7 @@
 export interface TokenAmountView {
-  balance: string
-  frozen: string
-  available: string
+  balance: number
+  frozen: number
+  available: number
 }
 
 export interface TokenBalances {
@@ -16,8 +16,8 @@ export interface TokenLedgerItem {
   id: number
   user_id: string
   token_type: string
-  change_amount: string
-  balance_after: string
+  change_amount: number
+  balance_after: number
   biz_type: string
   biz_id: string
   remark: string

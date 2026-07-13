@@ -107,9 +107,9 @@ function normalizeHref(href: string): string {
 }
 
 export function mapGameCardToProduct(card: HomepageGameCard): Product {
-  const price = card.is_free ? 0 : card.base_price_cents / 100
-  const originalPrice = card.original_price_cents > 0
-    ? card.original_price_cents / 100
+  const price = card.is_free ? 0 : card.base_token_amount
+  const originalPrice = card.original_token_amount > 0
+    ? card.original_token_amount
     : undefined
 
   return {

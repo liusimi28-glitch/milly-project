@@ -3,6 +3,12 @@ import type { HomepageGameCard, HomepageResponse } from '~/types/api/homepage'
 import { mapGameDetailResponse, mapGameListItemToProduct } from '~/lib/mappers/gameDetail'
 import { mapHomepageResponse } from '~/lib/mappers/homepage'
 
+const samplePrices = [
+  { currency_type: 'main_token', base_token_amount: 19, original_token_amount: 29 },
+  { currency_type: 'reward_token', base_token_amount: 19, original_token_amount: 29 },
+  { currency_type: 'promo_token', base_token_amount: 19, original_token_amount: 29 },
+]
+
 const sampleGameDetail: GameDetail = {
   id: 103,
   locale: 'zh-CN',
@@ -11,11 +17,7 @@ const sampleGameDetail: GameDetail = {
   about_description: '<p>关于游戏</p>',
   header_image: 'https://cdn.example.com/header.jpg',
   library_capsule_image: 'https://cdn.example.com/lib-cap.jpg',
-  currency: 'USD',
-  base_price_cents: 1999,
-  original_price_cents: 2999,
-  price_formatted: 'USD 19.99',
-  original_price_formatted: 'USD 29.99',
+  prices: samplePrices,
   is_free: false,
   coming_soon: false,
   platform_windows: true,
@@ -41,11 +43,11 @@ const sampleListItem: GameListItem = {
   title: '列表游戏',
   header_image: 'https://cdn.example.com/header2.jpg',
   main_capsule_image: 'https://cdn.example.com/main.jpg',
-  currency: 'USD',
-  base_price_cents: 999,
-  original_price_cents: 1999,
-  price_formatted: 'USD 9.99',
-  original_price_formatted: 'USD 19.99',
+  prices: [
+    { currency_type: 'promo_token', base_token_amount: 9, original_token_amount: 19 },
+    { currency_type: 'main_token', base_token_amount: 9, original_token_amount: 19 },
+    { currency_type: 'reward_token', base_token_amount: 9, original_token_amount: 19 },
+  ],
   is_free: false,
   coming_soon: false,
   platform_windows: true,
@@ -66,11 +68,11 @@ const sampleHomepage: HomepageResponse = {
         header_image: 'https://cdn.example.com/h.jpg',
         capsule_image: 'https://cdn.example.com/c.jpg',
         library_capsule_image: 'https://cdn.example.com/l.jpg',
-        currency: 'USD',
-        base_price_cents: 500,
-        original_price_cents: 1000,
-        price_formatted: 'USD 5.00',
-        original_price_formatted: 'USD 10.00',
+        prices: [
+          { currency_type: 'promo_token', base_token_amount: 5, original_token_amount: 10 },
+        ],
+        base_token_amount: 5,
+        original_token_amount: 10,
         discount_percent: 50,
         is_free: false,
         platform_windows: true,
@@ -107,6 +109,7 @@ describe('gameDetail mapper', () => {
     expect(product.image).toBe('https://cdn.example.com/lib-cap.jpg')
     expect(product.developers).toEqual(['Studio A'])
     expect(product.trailers[0]?.title).toBe('Launch Trailer')
+    expect(product.price).toBe(19)
   })
 })
 
@@ -116,7 +119,7 @@ describe('game list mapper', () => {
     expect(product.title).toBe('列表游戏')
     expect(product.image).toBe('https://cdn.example.com/main.jpg')
     expect(product.tags).toEqual(['角色扮演'])
-    expect(product.discount).toBe(50)
+    expect(product.discount).toBe(53)
   })
 })
 
@@ -125,5 +128,6 @@ describe('homepage mapper', () => {
     const vm = mapHomepageResponse(sampleHomepage)
     expect(vm.bestsellers[0]?.title).toBe('首页卡片')
     expect(vm.bestsellers[0]?.image).toBe('https://cdn.example.com/l.jpg')
+    expect(vm.bestsellers[0]?.price).toBe(5)
   })
 })

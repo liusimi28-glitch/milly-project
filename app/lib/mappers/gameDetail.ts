@@ -1,7 +1,7 @@
-import { formatPriceFromCents, formatReleaseDate } from '~/lib/format/price'
+import { formatReleaseDate } from '~/lib/format/price'
 import { resolveVerticalGameImage } from '~/lib/game-images'
 import { derivePlatform } from '~/lib/mappers/homepage'
-import type { GameDetail, GameListItem } from '~/types/api/game'
+import type { GameDetail, GameListItem, GamePrice } from '~/types/api/game'
 import type {
   BreadcrumbItem,
   Product,
@@ -11,12 +11,29 @@ import type {
   ProductTrailer,
 } from '~/types'
 
+function pickListPrice(prices: GamePrice[] = []) {
+  const promo = prices.find(p => p.currency_type === 'promo_token')
+  const main = prices.find(p => p.currency_type === 'main_token')
+  const row = promo ?? main ?? prices[0]
+  if (!row) {
+    return { base: 0, original: 0 }
+  }
+  return {
+    base: row.base_token_amount,
+    original: row.original_token_amount,
+  }
+}
+
+function formatTokenAmount(amount: number) {
+  if (amount <= 0) return '免费'
+  return `${amount} 代币`
+}
+
 export function mapGameListItemToProduct(item: GameListItem): Product {
-  const price = item.is_free ? 0 : item.base_price_cents / 100
-  const originalPrice = item.original_price_cents > 0
-    ? item.original_price_cents / 100
-    : undefined
-  const discount = computeDiscountPercent(item.base_price_cents, item.original_price_cents)
+  const { base, original } = pickListPrice(item.prices)
+  const price = item.is_free ? 0 : base
+  const originalPrice = original > price ? original : undefined
+  const discount = computeDiscountPercent(base, original)
 
   return {
     id: String(item.id),
@@ -24,7 +41,7 @@ export function mapGameListItemToProduct(item: GameListItem): Product {
     platform: derivePlatform(item),
     region: 'Global',
     price,
-    originalPrice: originalPrice && originalPrice > price ? originalPrice : undefined,
+    originalPrice,
     discount,
     image: resolveVerticalGameImage(item),
     seller: 'SiteA',
@@ -37,10 +54,9 @@ export function mapGameDetailResponse(raw: GameDetail, locale: string): ProductD
   const title = raw.title || '未命名游戏'
   const screenshots = mapScreenshots(raw, title)
   const trailers = mapTrailers(raw)
-  const price = raw.is_free ? 0 : raw.base_price_cents / 100
-  const originalPrice = raw.original_price_cents > 0
-    ? raw.original_price_cents / 100
-    : undefined
+  const { base, original } = pickListPrice(raw.prices)
+  const price = raw.is_free ? 0 : base
+  const originalPrice = original > price ? original : undefined
   const developers = raw.developers ?? []
   const publishers = raw.publishers ?? []
 
@@ -50,8 +66,8 @@ export function mapGameDetailResponse(raw: GameDetail, locale: string): ProductD
     platform: derivePlatform(raw),
     region: 'Global',
     price,
-    originalPrice: originalPrice && originalPrice > price ? originalPrice : undefined,
-    discount: computeDiscountPercent(raw.base_price_cents, raw.original_price_cents),
+    originalPrice,
+    discount: computeDiscountPercent(base, original),
     image: resolveVerticalGameImage(raw),
     seller: 'SiteA',
     sellerRating: 4.5,
@@ -85,7 +101,7 @@ export function mapGameDetailResponse(raw: GameDetail, locale: string): ProductD
     platformLinux: raw.platform_linux,
     isFree: raw.is_free,
     comingSoon: raw.coming_soon,
-    currency: raw.currency,
+    currency: '',
     metacriticScore: raw.metacritic_score,
     releaseDate: formatReleaseDate(raw.release_date, locale),
     requiredAge: raw.required_age,
@@ -94,13 +110,9 @@ export function mapGameDetailResponse(raw: GameDetail, locale: string): ProductD
     supportedLanguages: raw.supported_languages?.map(lang => lang.language_code) ?? [],
     supportUrl: raw.support_url,
     supportEmail: raw.support_email,
-    priceFormatted: raw.is_free
-      ? '免费'
-      : raw.price_formatted || formatPriceFromCents(raw.base_price_cents, raw.currency, locale),
-    originalPriceFormatted: raw.original_price_formatted
-      || (raw.original_price_cents > 0
-        ? formatPriceFromCents(raw.original_price_cents, raw.currency, locale)
-        : undefined),
+    priceFormatted: raw.is_free ? '免费' : formatTokenAmount(base),
+    originalPriceFormatted: originalPrice ? formatTokenAmount(originalPrice) : undefined,
+    prices: raw.prices ?? [],
   }
 }
 
@@ -209,17 +221,25 @@ function buildSpecs(
 }
 
 function computeDiscountPercent(
-  basePriceCents: number,
-  originalPriceCents: number,
+  baseAmount: number,
+  originalAmount: number,
 ): number | undefined {
-  if (originalPriceCents <= 0 || basePriceCents >= originalPriceCents) {
+  if (originalAmount <= 0 || baseAmount >= originalAmount) {
     return undefined
   }
 
-  return Math.round((1 - basePriceCents / originalPriceCents) * 100)
+  return Math.round((1 - baseAmount / originalAmount) * 100)
 }
 
 function metacriticToRating(score?: number): number {
   if (!score || score <= 0) return 0
   return Math.round((score / 100) * 5 * 10) / 10
+}
+
+export function tokenPriceForType(
+  prices: GamePrice[] | undefined,
+  tokenType: string,
+): number {
+  const row = prices?.find(p => p.currency_type === tokenType)
+  return row?.base_token_amount ?? 0
 }
