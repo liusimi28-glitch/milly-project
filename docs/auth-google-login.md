@@ -55,6 +55,17 @@ NUXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
 
 路径消毒规则：仅允许以 `/` 开头的站内路径；拒绝 `//`、含 `://` 的外链。
 
+## 头像约定
+
+| 来源 | 规则 |
+|------|------|
+| Supabase session | 客户端按 `avatar_url` → `picture` → `identities[].identity_data` 解析（见 `app/lib/auth-avatar.ts`） |
+| 后端权威 | `player_profiles.avatar_url`；Webhook / JWT 同步使用同一解析优先级 |
+| 补全策略 | **仅当库内头像为空**时写入 OAuth 头像；用户自定义后不被 Google 覆盖 |
+| 导航展示 | 优先已拉取的 profile 头像，否则用 session 解析结果；`<img referrerpolicy="no-referrer">` |
+
+老用户库内无头像：登录后任意带 JWT 的受保护 API（如 `GET /client/profile`）会触发 `SyncIdentity` 空头像回填。
+
 ## 验收清单（AE）
 
 ### AE1 — 成功回流
@@ -74,12 +85,23 @@ NUXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
 
 1. Google 新用户登录成功后，浏览器 DevTools → Network  
 2. 调用 `GET {API}/api/v1/client/profile`，请求头含 `Authorization: Bearer …`  
-3. 期望 **200** 与用户资料；若 401/404，检查 GoTrue `after-user-created` Webhook 与 JWT 同步  
+3. 期望 **200** 与用户资料；`player_profile.avatar_url` 应为 Google 头像 URL（含仅有 `picture` 字段的情况）  
+4. 若 401/404，检查 GoTrue `after-user-created` Webhook 与 JWT 同步  
+
+### AE4 — 头像展示与不覆盖
+
+1. 导航栏显示 Google 头像（非首字母）  
+2. `/account` 可见头像预览；「使用 Google 头像」在 session 有图且与已保存不同时出现  
+3. 手动改头像 URL 并保存后，再登录，自定义头像仍保留  
 
 ## 相关文件
 
 - `app/composables/useSupabaseAuth.ts` — `signInWithGoogle`  
+- `app/lib/auth-avatar.ts` — session / identity 头像解析  
 - `app/lib/auth-redirect.ts` — 路径消毒与 OAuth 错误解析  
 - `app/components/layout/AuthFormPanel.vue` — 登录面板  
+- `app/components/layout/AuthDropdown.vue` — 导航头像  
 - `app/pages/auth/callback.vue` — OAuth 回跳页  
 - `docs/api-client.md` — 鉴权 API 客户端总览  
+- `mall-back/internal/service/auth_avatar.go` — 后端统一解析  
+- `mall-back/internal/service/role.go` — `SyncIdentity` 空头像回填  

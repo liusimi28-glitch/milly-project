@@ -1,5 +1,6 @@
 import type { AuthError, Session, User } from '@supabase/supabase-js'
 import { buildAuthCallbackUrl } from '~/lib/auth-redirect'
+import { resolveAuthAvatarUrl } from '~/lib/auth-avatar'
 
 export function useSupabaseAuth() {
   const { $supabase } = useNuxtApp()
@@ -32,10 +33,7 @@ export function useSupabaseAuth() {
     return isAnonymous.value ? 'Guest' : 'User'
   })
 
-  const avatarUrl = computed(() => {
-    const url = user.value?.user_metadata?.avatar_url
-    return typeof url === 'string' ? url : undefined
-  })
+  const avatarUrl = computed(() => resolveAuthAvatarUrl(user.value))
 
   const userInitial = computed(() => {
     const name = displayName.value.trim()

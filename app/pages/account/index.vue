@@ -1,17 +1,45 @@
 <script setup lang="ts">
 const { isLoggedIn } = useApiAuth()
 const { profile, pending, error, refresh, saveProfile } = useProfile()
+const { avatarUrl: oauthAvatarUrl } = useSupabaseAuth()
 const { withLocale } = useProductRoute()
 
 const nickname = ref('')
 const avatar = ref('')
 const savePending = ref(false)
 const saveMessage = ref('')
+const previewBroken = ref(false)
 
 watch(profile, (value) => {
   nickname.value = value?.player_profile?.nickname ?? ''
   avatar.value = value?.player_profile?.avatar_url ?? ''
 }, { immediate: true })
+
+watch(avatar, () => {
+  previewBroken.value = false
+})
+
+const previewUrl = computed(() => {
+  const trimmed = avatar.value.trim()
+  return trimmed || undefined
+})
+
+const canUseGoogleAvatar = computed(() => {
+  const oauth = oauthAvatarUrl.value?.trim()
+  if (!oauth) return false
+  return oauth !== avatar.value.trim()
+})
+
+function useGoogleAvatar() {
+  const oauth = oauthAvatarUrl.value?.trim()
+  if (!oauth) return
+  avatar.value = oauth
+  previewBroken.value = false
+}
+
+function onPreviewError() {
+  previewBroken.value = true
+}
 
 async function handleSave() {
   saveMessage.value = ''
@@ -88,14 +116,42 @@ useHead({ title: '个人资料 | milly-project' })
           >
         </label>
 
-        <label class="block text-sm text-g2a-muted">
-          头像 URL
-          <input
-            v-model="avatar"
-            type="url"
-            class="mt-1 h-10 w-full rounded-md border border-g2a-border px-3 text-g2a-text"
-          >
-        </label>
+        <div class="space-y-2">
+          <label class="block text-sm text-g2a-muted">
+            头像 URL
+            <input
+              v-model="avatar"
+              type="url"
+              class="mt-1 h-10 w-full rounded-md border border-g2a-border px-3 text-g2a-text"
+            >
+          </label>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <div
+              class="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-g2a-dark text-sm font-bold text-white"
+              aria-hidden="true"
+            >
+              <img
+                v-if="previewUrl && !previewBroken"
+                :src="previewUrl"
+                alt=""
+                referrerpolicy="no-referrer"
+                class="size-full object-cover"
+                @error="onPreviewError"
+              >
+              <span v-else>{{ (nickname.trim() || '?').charAt(0).toUpperCase() }}</span>
+            </div>
+
+            <button
+              v-if="canUseGoogleAvatar"
+              type="button"
+              class="text-sm font-medium text-g2a-blue hover:text-g2a-orange"
+              @click="useGoogleAvatar"
+            >
+              使用 Google 头像
+            </button>
+          </div>
+        </div>
 
         <button
           type="submit"

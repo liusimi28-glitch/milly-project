@@ -20,10 +20,30 @@ const {
   isLoggedIn,
   isAnonymous,
   displayName,
-  avatarUrl,
+  avatarUrl: sessionAvatarUrl,
   userInitial,
   signOut,
 } = useSupabaseAuth()
+
+const { profile } = useProfile()
+
+const avatarBroken = ref(false)
+
+const avatarUrl = computed(() => {
+  const fromProfile = profile.value?.player_profile?.avatar_url
+  if (typeof fromProfile === 'string' && fromProfile.trim()) {
+    return fromProfile.trim()
+  }
+  return sessionAvatarUrl.value
+})
+
+watch(avatarUrl, () => {
+  avatarBroken.value = false
+})
+
+function onAvatarError() {
+  avatarBroken.value = true
+}
 
 function toggleOpen() {
   if (!open.value) {
@@ -80,10 +100,12 @@ watch(isLoggedIn, (loggedIn) => {
         class="relative flex size-8 items-center justify-center overflow-hidden rounded-full bg-g2a-dark text-sm font-bold text-white"
       >
         <img
-          v-if="avatarUrl"
+          v-if="avatarUrl && !avatarBroken"
           :src="avatarUrl"
           :alt="displayName"
+          referrerpolicy="no-referrer"
           class="size-full object-cover"
+          @error="onAvatarError"
         >
         <span v-else>{{ userInitial }}</span>
       </div>
