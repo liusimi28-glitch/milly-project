@@ -1,4 +1,5 @@
 import type { AuthError, Session, User } from '@supabase/supabase-js'
+import { buildAuthCallbackUrl } from '~/lib/auth-redirect'
 
 export function useSupabaseAuth() {
   const { $supabase } = useNuxtApp()
@@ -10,7 +11,7 @@ export function useSupabaseAuth() {
   const authPending = ref(false)
   const isConfigured = computed(() => !!$supabase)
 
-  const configError = 'Supabase is not configured. Check .env.local and restart the dev server.'
+  const configError = 'Supabase 未配置。请检查 .env.local 后重启开发服务器。'
 
   function requireSupabase() {
     if (!$supabase) {
@@ -53,8 +54,9 @@ export function useSupabaseAuth() {
     return captchaToken ? { captchaToken } : undefined
   }
 
-  function buildRedirectTo() {
-    return import.meta.client ? `${window.location.origin}/auth/callback` : undefined
+  function buildRedirectTo(redirectPath?: string | null) {
+    if (!import.meta.client) return undefined
+    return buildAuthCallbackUrl(window.location.origin, redirectPath)
   }
 
   async function signUp(email: string, password: string, captchaToken?: string) {
@@ -99,18 +101,19 @@ export function useSupabaseAuth() {
     return { ok: true as const }
   }
 
-  async function signInWithGoogle() {
+  async function signInWithGoogle(redirectPath?: string | null) {
     const client = requireSupabase()
     if (!client) return { ok: false as const }
     authPending.value = true
     clearError()
-    const redirectTo = buildRedirectTo()
+    const redirectTo = buildRedirectTo(redirectPath)
     const { error } = await client.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo },
     })
-    authPending.value = false
+    // OAuth 成功时会整页跳离；仅在本地错误时结束 pending
     if (error) {
+      authPending.value = false
       setError(error)
       return { ok: false as const, error }
     }

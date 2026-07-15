@@ -6,6 +6,8 @@ const emit = defineEmits<{
   success: []
 }>()
 
+const route = useRoute()
+
 const {
   authError,
   authPending,
@@ -42,7 +44,7 @@ async function handleEmailSubmit() {
   const trimmedEmail = email.value.trim()
   if (!trimmedEmail || !password.value) return
   if (!captchaReady.value) {
-    infoMessage.value = 'Please complete verification first.'
+    infoMessage.value = '请先完成验证。'
     return
   }
 
@@ -55,7 +57,7 @@ async function handleEmailSubmit() {
     if ('needsConfirmation' in result && result.needsConfirmation) {
       confirmEmail.value = trimmedEmail
       resendCountdown.start(60)
-      infoMessage.value = 'Check your email to confirm your account.'
+      infoMessage.value = '请查收邮件以确认账号。'
       return
     }
     confirmEmail.value = null
@@ -64,15 +66,13 @@ async function handleEmailSubmit() {
 }
 
 async function handleGoogleSignIn() {
-  const result = await signInWithGoogle()
-  if (result.ok) {
-    emit('success')
-  }
+  // OAuth 将整页跳转，成功时不要 emit('success')
+  await signInWithGoogle(route.fullPath)
 }
 
 async function handleAnonymousSignIn() {
   if (!captchaReady.value) {
-    infoMessage.value = 'Please complete verification first.'
+    infoMessage.value = '请先完成验证。'
     return
   }
   const result = await signInAnonymously(turnstileToken.value ?? undefined)
@@ -86,14 +86,14 @@ async function handleResendConfirmation() {
   const targetEmail = confirmEmail.value ?? email.value.trim()
   if (!targetEmail || resendCountdown.active.value) return
   if (!captchaReady.value) {
-    infoMessage.value = 'Please complete verification first.'
+    infoMessage.value = '请先完成验证。'
     return
   }
   const result = await resendConfirmation(targetEmail, turnstileToken.value ?? undefined)
   resetCaptcha()
   if (result.ok) {
     resendCountdown.start(60)
-    infoMessage.value = 'Confirmation email sent again.'
+    infoMessage.value = '确认邮件已重新发送。'
   }
 }
 
@@ -101,14 +101,14 @@ async function handleOtpSignIn() {
   const trimmedEmail = email.value.trim()
   if (!trimmedEmail || otpCountdown.active.value) return
   if (!captchaReady.value) {
-    infoMessage.value = 'Please complete verification first.'
+    infoMessage.value = '请先完成验证。'
     return
   }
   const result = await signInWithOtp(trimmedEmail, turnstileToken.value ?? undefined)
   resetCaptcha()
   if (result.ok) {
     otpCountdown.start(60)
-    otpMessage.value = 'Magic link sent. Check your inbox.'
+    otpMessage.value = '登录链接已发送，请查收邮箱。'
   }
 }
 
@@ -134,10 +134,10 @@ watch([email, password], () => {
   <div class="py-3.5" data-test-id="dropdown-menu">
     <div class="px-4 pb-3">
       <p class="text-base font-semibold text-g2a-text">
-        Welcome!
+        欢迎！
       </p>
       <p class="mt-1 text-xs text-g2a-muted">
-        Sign in to sync your orders and preferences.
+        登录后可同步订单与偏好设置。
       </p>
     </div>
 
@@ -155,7 +155,7 @@ watch([email, password], () => {
           <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
           <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
         </svg>
-        Sign in with Google
+        {{ authPending ? '正在跳转…' : '使用 Google 登录' }}
       </Button>
 
       <div class="relative py-2">
@@ -163,7 +163,7 @@ watch([email, password], () => {
           <span class="w-full border-t border-g2a-border" />
         </div>
         <div class="relative flex justify-center text-xs uppercase">
-          <span class="bg-white px-2 text-g2a-muted">or</span>
+          <span class="bg-white px-2 text-g2a-muted">或</span>
         </div>
       </div>
 
@@ -172,7 +172,7 @@ watch([email, password], () => {
           v-model="email"
           type="email"
           autocomplete="email"
-          placeholder="Email"
+          placeholder="邮箱"
           class="h-10 border-g2a-border"
           :disabled="authPending"
           required
@@ -181,7 +181,7 @@ watch([email, password], () => {
           v-model="password"
           type="password"
           :autocomplete="mode === 'register' ? 'new-password' : 'current-password'"
-          placeholder="Password"
+          placeholder="密码"
           class="h-10 border-g2a-border"
           :disabled="authPending"
           minlength="6"
@@ -213,7 +213,7 @@ watch([email, password], () => {
           class="h-10 w-full bg-g2a-orange text-white hover:bg-g2a-orange/90"
           :disabled="authPending"
         >
-          {{ mode === 'register' ? 'Create account' : 'Sign in' }}
+          {{ mode === 'register' ? '创建账号' : '登录' }}
         </Button>
 
         <Button
@@ -224,7 +224,7 @@ watch([email, password], () => {
           :disabled="authPending || otpCountdown.active"
           @click="handleOtpSignIn"
         >
-          {{ otpCountdown.active ? `Resend magic link in ${otpCountdown.remaining}s` : 'Email me a sign-in link' }}
+          {{ otpCountdown.active ? `${otpCountdown.remaining}s 后可重发魔法链接` : '发送邮件登录链接' }}
         </Button>
 
         <Button
@@ -235,7 +235,7 @@ watch([email, password], () => {
           :disabled="authPending || resendCountdown.active"
           @click="handleResendConfirmation"
         >
-          {{ resendCountdown.active ? `Resend confirmation in ${resendCountdown.remaining}s` : 'Resend confirmation email' }}
+          {{ resendCountdown.active ? `${resendCountdown.remaining}s 后可重发确认邮件` : '重发确认邮件' }}
         </Button>
       </form>
 
@@ -246,35 +246,35 @@ watch([email, password], () => {
         :disabled="authPending"
         @click="handleAnonymousSignIn"
       >
-        Continue as guest
+        以访客身份继续
       </Button>
     </div>
 
     <div class="mt-3 border-t border-g2a-border px-4 pt-3">
       <p class="text-center text-xs text-g2a-muted">
         <template v-if="mode === 'login'">
-          Don't have an account?
+          还没有账号？
           <button
             type="button"
             class="font-medium text-g2a-orange hover:underline"
             @click="switchMode('register')"
           >
-            Register
+            注册
           </button>
         </template>
         <template v-else>
-          Already have an account?
+          已有账号？
           <button
             type="button"
             class="font-medium text-g2a-orange hover:underline"
             @click="switchMode('login')"
           >
-            Sign in
+            登录
           </button>
         </template>
       </p>
       <p class="mt-2 text-[11px] leading-relaxed text-g2a-muted">
-        By signing in with Google or email, you agree to our Terms &amp; Conditions and Privacy Policy.
+        使用 Google 或邮箱登录，即表示你同意我们的服务条款与隐私政策。
       </p>
     </div>
   </div>

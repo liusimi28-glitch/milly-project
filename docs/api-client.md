@@ -10,6 +10,8 @@ NUXT_PUBLIC_SUPABASE_URL=...
 NUXT_PUBLIC_SUPABASE_ANON_KEY=...
 ```
 
+Google 登录配置与验收见 [`auth-google-login.md`](./auth-google-login.md)。
+
 ## 请求层
 
 | 模块 | 说明 |
