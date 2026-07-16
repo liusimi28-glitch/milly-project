@@ -159,7 +159,7 @@ watch(isLoggedIn, (loggedIn) => {
                 个人资料
               </NuxtLink>
               <NuxtLink
-                :to="withLocale('/library')"
+                :to="withLocale('/mall/inventory')"
                 class="text-g2a-text transition-colors hover:text-g2a-orange"
                 @click="close"
               >
@@ -173,7 +173,7 @@ watch(isLoggedIn, (loggedIn) => {
                 我的订单
               </NuxtLink>
               <NuxtLink
-                :to="withLocale('/wallet')"
+                :to="withLocale('/mall/recharge')"
                 class="text-g2a-text transition-colors hover:text-g2a-orange"
                 @click="close"
               >

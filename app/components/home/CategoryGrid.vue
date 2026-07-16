@@ -10,7 +10,7 @@ const hasCategories = computed(() => categoryQuickLinks.value.length > 0)
 
 function categoryHref(category: Category) {
   const params = new URLSearchParams({ locale: locale.value, tag: category.slug })
-  return `/games?${params.toString()}`
+  return `/mall?${params.toString()}`
 }
 
 const iconClass = computed(() => [

@@ -19,7 +19,7 @@ useHead({ title: '我的游戏库 | milly-project' })
         </p>
       </div>
       <NuxtLink
-        :to="withLocale('/games')"
+        :to="withLocale('/mall')"
         class="text-sm font-medium text-g2a-blue hover:text-g2a-orange"
       >
         浏览商店 →
@@ -80,7 +80,7 @@ useHead({ title: '我的游戏库 | milly-project' })
         库中还没有游戏
       </p>
       <NuxtLink
-        :to="withLocale('/games')"
+        :to="withLocale('/mall')"
         class="mt-4 inline-flex text-sm font-medium text-g2a-blue hover:text-g2a-orange"
       >
         去商店看看 →

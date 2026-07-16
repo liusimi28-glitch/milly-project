@@ -58,7 +58,7 @@ useHead({ title: '促销活动 | milly-project' })
           {{ promotion.start_time }} — {{ promotion.end_time }}
         </p>
         <NuxtLink
-          :to="`/games?locale=${encodeURIComponent(locale)}`"
+          :to="`/mall?locale=${encodeURIComponent(locale)}`"
           class="mt-4 inline-flex text-sm text-g2a-blue hover:text-g2a-orange"
         >
           浏览参与游戏 →

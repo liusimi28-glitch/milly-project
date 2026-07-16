@@ -1,5 +1,6 @@
 import { formatReleaseDate } from '~/lib/format/price'
 import { resolveVerticalGameImage } from '~/lib/game-images'
+import { mallPathWithLocale } from '~/lib/mall-routes'
 import { derivePlatform } from '~/lib/mappers/homepage'
 import type { GameDetail, GameListItem, GamePrice } from '~/types/api/game'
 import type {
@@ -118,14 +119,14 @@ export function mapGameDetailResponse(raw: GameDetail, locale: string): ProductD
 
 function buildBreadcrumb(title: string, locale: string): BreadcrumbItem[] {
   return [
-    { label: '首页', href: withLocaleQuery('/', locale) },
-    { label: '游戏', href: withLocaleQuery('/games', locale) },
+    { label: '商城首页', href: mallPathWithLocale('', locale) },
+    { label: '游戏', href: mallPathWithLocale('', locale) },
     { label: title },
   ]
 }
 
 function withLocaleQuery(path: string, locale: string): string {
-  return `${path}?locale=${encodeURIComponent(locale)}`
+  return mallPathWithLocale(path.replace(/^\//, ''), locale)
 }
 
 function mapScreenshots(raw: GameDetail, title: string): ProductImage[] {

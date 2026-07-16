@@ -15,8 +15,9 @@ const quantity = defineModel<number>('quantity', { default: 1 })
 
 const { isLoggedIn } = useApiAuth()
 const { placeOrder } = useOrders()
+const { addItem } = useCart()
 const { tokenBalances, tokenEnabled, refreshTokenBalances } = useTokenWallet()
-const { withLocale } = useProductRoute()
+const { withLocale, mallLink } = useProductRoute()
 const router = useRouter()
 
 const cartFeedback = ref<'idle' | 'added'>('idle')
@@ -89,6 +90,7 @@ watch([tokenBalances, () => props.product.prices], pickDefaultTokenType, { immed
 async function handleAddToCart() {
   if (!props.product.inStock) return
 
+  addItem(props.product, quantity.value)
   cartFeedback.value = 'added'
   await new Promise(resolve => setTimeout(resolve, 1200))
   cartFeedback.value = 'idle'
@@ -128,7 +130,7 @@ async function handleBuyNow() {
     })
     buySuccess.value = true
     await refreshTokenBalances()
-    await router.push(withLocale('/library'))
+    await router.push(mallLink('/inventory'))
   }
   catch (error) {
     if (error instanceof ApiError && error.isUnauthorized) {

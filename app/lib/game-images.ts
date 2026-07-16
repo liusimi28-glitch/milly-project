@@ -18,3 +18,13 @@ export function resolveVerticalGameImage(fields: VerticalGameImageFields): strin
     || fields.capsule_image
     || GAME_IMAGE_PLACEHOLDER
 }
+
+/** Resolve horizontal capsule for mall list cards (~462×174). */
+export function resolveHorizontalGameImage(fields: VerticalGameImageFields): string {
+  return fields.main_capsule_image
+    || fields.header_image
+    || fields.capsule_image
+    || fields.library_capsule_image
+    || fields.vertical_capsule_image
+    || GAME_IMAGE_PLACEHOLDER
+}

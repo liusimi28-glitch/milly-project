@@ -1,10 +1,19 @@
+import { mallPath, MALL_PREFIX } from '~/lib/mall-routes'
+
 export function useProductRoute() {
   const locale = useHomepageLocale()
 
+  function withLocaleQuery(extraQuery?: Record<string, string>) {
+    return {
+      locale: locale.value,
+      ...extraQuery,
+    }
+  }
+
   function productLink(id: string) {
     return {
-      path: `/product/${id}`,
-      query: { locale: locale.value },
+      path: mallPath(`/product/${id}`),
+      query: withLocaleQuery(),
     }
   }
 
@@ -13,21 +22,22 @@ export function useProductRoute() {
       return path
     }
 
-    const query: Record<string, string> = {
-      locale: locale.value,
-      ...extraQuery,
-    }
-
-    if (path.startsWith('/product/')) {
-      return {
-        path,
-        query,
-      }
-    }
+    const normalizedPath = path.startsWith(MALL_PREFIX)
+      ? path
+      : path.startsWith('/product/')
+        ? mallPath(path)
+        : mallPath(path)
 
     return {
-      path,
-      query,
+      path: normalizedPath,
+      query: withLocaleQuery(extraQuery),
+    }
+  }
+
+  function mallLink(path = '', extraQuery?: Record<string, string>) {
+    return {
+      path: mallPath(path),
+      query: withLocaleQuery(extraQuery),
     }
   }
 
@@ -35,5 +45,7 @@ export function useProductRoute() {
     locale: readonly(locale),
     productLink,
     withLocale,
+    mallLink,
+    mallPath,
   }
 }

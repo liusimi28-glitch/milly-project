@@ -69,7 +69,7 @@ function onBlur(event: FocusEvent) {
 function goToGames(search?: string) {
   const params = new URLSearchParams({ locale: locale.value })
   if (search?.trim()) params.set('q', search.trim())
-  navigateTo(`/games?${params.toString()}`)
+  navigateTo(`/mall?${params.toString()}`)
 }
 </script>
 

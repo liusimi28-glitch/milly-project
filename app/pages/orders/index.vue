@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const { isLoggedIn } = useApiAuth()
 const { orders, pending, error, refresh } = useOrders()
-const locale = useHomepageLocale()
+const { productLink } = useProductRoute()
 
 const statusLabel: Record<string, string> = {
   pending: '待支付',
@@ -71,7 +71,7 @@ useHead({ title: '我的订单 | milly-project' })
           </div>
         </div>
         <NuxtLink
-          :to="`/product/${order.game_id}?locale=${encodeURIComponent(locale)}`"
+          :to="productLink(String(order.game_id))"
           class="mt-3 inline-flex text-sm text-g2a-blue hover:text-g2a-orange"
         >
           查看游戏 →

@@ -101,7 +101,10 @@ function mapCategory(category: HomepageCategory): Category {
 
 function normalizeHref(href: string): string {
   if (href.startsWith('/promotion/')) {
-    return href.replace('/promotion/', '/product/')
+    return href.replace('/promotion/', '/mall/product/')
+  }
+  if (href.startsWith('/product/')) {
+    return href.replace('/product/', '/mall/product/')
   }
   return href
 }

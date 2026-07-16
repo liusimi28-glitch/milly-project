@@ -9,6 +9,8 @@ import {
 import type { Category } from '~/types'
 
 const { categories } = useMockProducts()
+const { itemCount } = useCart()
+const { mallLink } = useProductRoute()
 const { isScrolled } = useScrollHeader(80)
 const { prefersReducedMotion } = useReducedMotion()
 
@@ -144,15 +146,16 @@ onUnmounted(() => {
           />
 
           <NuxtLink
-            to="/cart"
+            :to="mallLink('/cart')"
             :class="cartLinkClass"
-            aria-label="Cart, 3 items"
+            :aria-label="`Cart, ${itemCount} items`"
           >
             <ShoppingCartIcon class="size-5" />
             <span
+              v-if="itemCount > 0"
               class="absolute -top-0.5 -right-0.5 flex size-4.5 items-center justify-center rounded-full bg-g2a-orange text-[10px] font-bold text-white"
             >
-              3
+              {{ itemCount > 9 ? '9+' : itemCount }}
             </span>
           </NuxtLink>
 
